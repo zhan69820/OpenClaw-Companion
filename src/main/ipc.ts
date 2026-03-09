@@ -1,7 +1,7 @@
 import { ipcMain, BrowserWindow, dialog, shell } from 'electron'
-import { exec } from 'child_process'
+import { exec, spawn, ChildProcess } from 'child_process'
 import { promisify } from 'util'
-import { existsSync, readdirSync, statSync, mkdirSync, readFileSync, writeFileSync, unlinkSync } from 'fs'
+import { existsSync, readdirSync, statSync, mkdirSync, readFileSync, writeFileSync, unlinkSync, createReadStream } from 'fs'
 import { join } from 'path'
 import { homedir } from 'os'
 import { ConfigManager } from './config'
@@ -12,6 +12,9 @@ import { checkForUpdates } from './updater'
 const execAsync = promisify(exec)
 
 export function registerIpcHandlers(mainWindow: BrowserWindow): void {
+  // OpenClaw 进程管理
+  let openclawProcess: ChildProcess | null = null
+  const openclawLogPath = join(homedir(), '.openclaw', 'companion-logs.txt')
   const configManager = new ConfigManager()
 
   // ── 窗口控制 ──
@@ -134,6 +137,123 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
         success: false, 
         message: error?.message || '安装失败，请尝试手动安装' 
       }
+    }
+  })
+
+  // ── OpenClaw 进程管理 ──
+  ipcMain.handle('openclaw:start', async () => {
+    if (openclawProcess && !openclawProcess.killed) {
+      return { ok: false, message: 'OpenClaw 已在运行中' }
+    }
+
+    try {
+      // 确保日志目录存在
+      const logDir = join(homedir(), '.openclaw')
+      if (!existsSync(logDir)) mkdirSync(logDir, { recursive: true })
+
+      // 启动 OpenClaw
+      openclawProcess = spawn('openclaw', ['start'], {
+        detached: false,
+        stdio: ['ignore', 'pipe', 'pipe']
+      })
+
+      // 写入日志
+      const logStream = createReadStream(openclawLogPath)
+      openclawProcess.stdout?.on('data', (data) => {
+        try {
+          writeFileSync(openclawLogPath, data.toString(), { flag: 'a' })
+        } catch { /* ignore */ }
+      })
+      openclawProcess.stderr?.on('data', (data) => {
+        try {
+          writeFileSync(openclawLogPath, data.toString(), { flag: 'a' })
+        } catch { /* ignore */ }
+      })
+
+      openclawProcess.on('exit', (code) => {
+        console.log(`OpenClaw exited with code ${code}`)
+        openclawProcess = null
+      })
+
+      // 等待一下确认启动成功
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      if (openclawProcess && !openclawProcess.killed) {
+        return { ok: true, message: 'OpenClaw 启动成功', pid: openclawProcess.pid }
+      } else {
+        return { ok: false, message: 'OpenClaw 启动失败' }
+      }
+    } catch (error: any) {
+      return { ok: false, message: error?.message || '启动失败' }
+    }
+  })
+
+  ipcMain.handle('openclaw:stop', async () => {
+    if (!openclawProcess || openclawProcess.killed) {
+      // 尝试通过命令停止
+      try {
+        await execAsync('openclaw stop', { timeout: 10000 })
+        return { ok: true, message: 'OpenClaw 已停止' }
+      } catch {
+        return { ok: false, message: 'OpenClaw 未在运行' }
+      }
+    }
+
+    try {
+      openclawProcess.kill('SIGTERM')
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      if (!openclawProcess.killed) {
+        openclawProcess.kill('SIGKILL')
+      }
+
+      openclawProcess = null
+      return { ok: true, message: 'OpenClaw 已停止' }
+    } catch (error: any) {
+      return { ok: false, message: error?.message || '停止失败' }
+    }
+  })
+
+  ipcMain.handle('openclaw:status', async () => {
+    const isRunning = openclawProcess && !openclawProcess.killed
+
+    // 尝试通过端口检测确认状态
+    let portStatus = false
+    try {
+      const portCheck = await checkPort(3000) // OpenClaw 默认端口
+      portStatus = portCheck.inUse
+    } catch { /* ignore */ }
+
+    return {
+      running: isRunning || portStatus,
+      pid: openclawProcess?.pid || null,
+      port: portStatus ? 3000 : null
+    }
+  })
+
+  ipcMain.handle('openclaw:getLogs', async () => {
+    try {
+      if (!existsSync(openclawLogPath)) {
+        return { ok: true, logs: '暂无日志' }
+      }
+      const logs = readFileSync(openclawLogPath, 'utf-8')
+      // 只返回最后 500 行避免过大
+      const lines = logs.split('\n')
+      const recentLogs = lines.slice(-500).join('\n')
+      return { ok: true, logs: recentLogs }
+    } catch (error: any) {
+      return { ok: false, message: error?.message || '读取日志失败' }
+    }
+  })
+
+  ipcMain.handle('openclaw:clearLogs', async () => {
+    try {
+      if (existsSync(openclawLogPath)) {
+        writeFileSync(openclawLogPath, '', 'utf-8')
+      }
+      return { ok: true }
+    } catch (error: any) {
+      return { ok: false, message: error?.message || '清除日志失败' }
     }
   })
 

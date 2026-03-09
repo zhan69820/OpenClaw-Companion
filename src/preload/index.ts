@@ -30,10 +30,15 @@ const api = {
   doctor: {
     checkPort: (port: number) => ipcRenderer.invoke('doctor:checkPort', port)
   },
-  // OpenClaw 安装检测
+  // OpenClaw 安装检测与进程管理
   openclaw: {
     check: () => ipcRenderer.invoke('openclaw:check'),
-    install: () => ipcRenderer.invoke('openclaw:install')
+    install: () => ipcRenderer.invoke('openclaw:install'),
+    start: () => ipcRenderer.invoke('openclaw:start'),
+    stop: () => ipcRenderer.invoke('openclaw:stop'),
+    status: () => ipcRenderer.invoke('openclaw:status'),
+    getLogs: () => ipcRenderer.invoke('openclaw:getLogs'),
+    clearLogs: () => ipcRenderer.invoke('openclaw:clearLogs')
   },
   // 备份与迁移
   backup: {

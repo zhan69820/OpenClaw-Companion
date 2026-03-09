@@ -35,6 +35,12 @@ const router = createRouter({
       meta: { title: '配置预览', icon: 'file-code' }
     },
     {
+      path: '/manager',
+      name: 'Manager',
+      component: () => import('@/views/OpenClawManager.vue'),
+      meta: { title: '服务管理', icon: 'activity' }
+    },
+    {
       path: '/uninstall',
       name: 'Uninstall',
       component: () => import('@/views/Uninstall.vue'),

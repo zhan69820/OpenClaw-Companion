@@ -31,7 +31,11 @@ const messages: Record<Locale, Record<string, string>> = {
     'nav.backup': '备份迁移',
     'nav.doctor': '故障急救',
     'nav.preview': '配置预览',
+    'nav.manager': '服务管理',
     'nav.uninstall': '卸载',
+
+    // 侧边栏
+    'sidebar.checkUpdate': '检查更新',
     
     // LLM Hub
     'llm.title': '模型配置中心',
@@ -212,7 +216,11 @@ const messages: Record<Locale, Record<string, string>> = {
     'nav.backup': 'Backup',
     'nav.doctor': 'Diagnostics',
     'nav.preview': 'Config Preview',
+    'nav.manager': 'Service Manager',
     'nav.uninstall': 'Uninstall',
+
+    // Sidebar
+    'sidebar.checkUpdate': 'Check for Updates',
     
     // LLM Hub
     'llm.title': 'AI Model Configuration',
@@ -392,7 +400,11 @@ const messages: Record<Locale, Record<string, string>> = {
     'nav.backup': 'Respaldo',
     'nav.doctor': 'Diagnostico',
     'nav.preview': 'Vista Previa',
+    'nav.manager': 'Gestion de Servicio',
     'nav.uninstall': 'Desinstalar',
+
+    // Sidebar
+    'sidebar.checkUpdate': 'Buscar Actualizaciones',
     
     // LLM Hub
     'llm.title': 'Configuracion de Modelos IA',

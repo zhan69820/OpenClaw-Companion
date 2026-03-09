@@ -18,7 +18,8 @@ import {
   Save,
   FolderOpen,
   Globe,
-  RefreshCw
+  RefreshCw,
+  Activity
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -55,6 +56,7 @@ const navItems = computed(() => [
   { path: '/backup', label: t('nav.backup'), icon: Archive, desc: 'Backup' },
   { path: '/doctor', label: t('nav.doctor'), icon: Stethoscope, desc: 'Doctor' },
   { path: '/preview', label: t('nav.preview'), icon: FileCode2, desc: 'Preview' },
+  { path: '/manager', label: t('nav.manager'), icon: Activity, desc: 'Service' },
   { path: '/uninstall', label: t('nav.uninstall'), icon: Trash2, desc: 'Uninstall' }
 ])
 
@@ -255,10 +257,10 @@ onMounted(() => {
           <button
             @click="checkForUpdates"
             class="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-            title="检查软件更新"
+            :title="t('sidebar.checkUpdate')"
           >
             <RefreshCw class="w-3.5 h-3.5" />
-            检查更新
+            {{ t('sidebar.checkUpdate') }}
           </button>
         </div>
       </aside>
