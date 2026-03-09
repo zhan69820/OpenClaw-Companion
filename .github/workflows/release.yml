@@ -46,21 +46,15 @@ jobs:
 
       - name: Build Windows
         if: matrix.platform == 'win'
-        run: npx electron-builder --win --config electron-builder.yml
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --win --config electron-builder.yml --publish never
 
       - name: Build macOS
         if: matrix.platform == 'mac'
-        run: npx electron-builder --mac --config electron-builder.yml -c.mac.identity=null
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --mac --config electron-builder.yml -c.mac.identity=null --publish never
 
       - name: Build Linux
         if: matrix.platform == 'linux'
-        run: npx electron-builder --linux --config electron-builder.yml
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --linux --config electron-builder.yml --publish never
 
       - name: List release files
         shell: bash

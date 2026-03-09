@@ -2,6 +2,11 @@
   "name": "openclaw-companion",
   "version": "1.0.0",
   "description": "OpenClaw Companion — 让 OpenClaw 配置变得简单",
+  "author": {
+    "name": "zhan69820",
+    "email": "zhan69820@users.noreply.github.com"
+  },
+  "license": "MIT",
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
