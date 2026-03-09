@@ -1,6 +1,20 @@
 # OpenClaw Companion
 
+[![Build and Release](https://github.com/zhan69820/OpenClaw-Companion/actions/workflows/release.yml/badge.svg)](https://github.com/zhan69820/OpenClaw-Companion/actions/workflows/release.yml)
+
 OpenClaw Companion 是 [OpenClaw](https://github.com/nicepkg/openclaw) AI 机器人框架的桌面配置管理工具。通过可视化界面替代手动编辑 YAML 配置文件，让 OpenClaw 的安装、配置、备份和迁移变得简单。
+
+## 下载安装
+
+| 平台 | 下载链接 | 说明 |
+|------|---------|------|
+| Windows | [Setup 安装版](https://github.com/zhan69820/OpenClaw-Companion/releases/latest) | 推荐，自动创建桌面快捷方式 |
+| Windows | [Portable 便携版](https://github.com/zhan69820/OpenClaw-Companion/releases/latest) | 无需安装，解压即用 |
+| macOS | [DMG 安装包](https://github.com/zhan69820/OpenClaw-Companion/releases/latest) | 支持 Intel 和 Apple Silicon |
+| Linux | [AppImage](https://github.com/zhan69820/OpenClaw-Companion/releases/latest) | 双击运行，无需安装 |
+| Linux | [deb 安装包](https://github.com/zhan69820/OpenClaw-Companion/releases/latest) | Ubuntu/Debian 系统 |
+
+> 前往 [Releases](https://github.com/zhan69820/OpenClaw-Companion/releases/latest) 页面下载最新版本。
 
 ## 功能特性
 
