@@ -11,17 +11,15 @@ permissions:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: windows-latest
             platform: win
-            artifact: win
           - os: macos-latest
             platform: mac
-            artifact: mac
           - os: ubuntu-latest
             platform: linux
-            artifact: linux
 
     runs-on: ${{ matrix.os }}
 
@@ -34,6 +32,12 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Install Linux dependencies
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libarchive-tools rpm
+
       - name: Install dependencies
         run: npm ci
 
@@ -43,14 +47,23 @@ jobs:
       - name: Build Windows
         if: matrix.platform == 'win'
         run: npx electron-builder --win --config electron-builder.yml
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build macOS
         if: matrix.platform == 'mac'
-        run: npx electron-builder --mac --config electron-builder.yml
+        run: npx electron-builder --mac --config electron-builder.yml -c.mac.identity=null
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Linux
         if: matrix.platform == 'linux'
         run: npx electron-builder --linux --config electron-builder.yml
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List release files
+        run: ls -la release/ || true
 
       - name: Upload Windows artifacts
         if: matrix.platform == 'win'
@@ -59,17 +72,14 @@ jobs:
           name: windows-build
           path: |
             release/*.exe
-            release/*.exe.blockmap
+            !release/*.exe.blockmap
 
       - name: Upload macOS artifacts
         if: matrix.platform == 'mac'
         uses: actions/upload-artifact@v4
         with:
           name: macos-build
-          path: |
-            release/*.dmg
-            release/*.dmg.blockmap
-            release/mac*/**/*
+          path: release/*.dmg
 
       - name: Upload Linux artifacts
         if: matrix.platform == 'linux'
@@ -79,7 +89,6 @@ jobs:
           path: |
             release/*.AppImage
             release/*.deb
-            release/*.tar.gz
 
   release:
     needs: build
@@ -89,26 +98,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download Windows artifacts
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          name: windows-build
-          path: release/
+          path: artifacts/
 
-      - name: Download macOS artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: macos-build
-          path: release/
-
-      - name: Download Linux artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: linux-build
-          path: release/
-
-      - name: List release files
-        run: ls -la release/
+      - name: Collect release files
+        run: |
+          mkdir -p release
+          find artifacts/ -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" \) -exec cp {} release/ \;
+          ls -la release/
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
