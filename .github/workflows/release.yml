@@ -63,6 +63,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: List release files
+        shell: bash
         run: ls -la release/ || true
 
       - name: Upload Windows artifacts
