@@ -28,7 +28,7 @@ mac:
   target:
     - target: dmg
       arch: [x64, arm64]
-  icon: build/icon.icns
+  icon: build/icon.png
 
 linux:
   target:
