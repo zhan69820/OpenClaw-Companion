@@ -13,3 +13,10 @@ declare global {
     api: Api
   }
 }
+
+// 更新进度事件
+declare module 'vue' {
+  export interface ComponentCustomProperties {
+    $onUpdateProgress?: (callback: (progress: { percent: number }) => void) => void
+  }
+}

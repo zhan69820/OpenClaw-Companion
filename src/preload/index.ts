@@ -54,6 +54,13 @@ const api = {
   uninstall: {
     scan: () => ipcRenderer.invoke('uninstall:scan'),
     execute: (selectedIds: string[]) => ipcRenderer.invoke('uninstall:execute', selectedIds)
+  },
+  // 检查更新
+  updater: {
+    check: () => ipcRenderer.invoke('updater:check'),
+    onProgress: (callback: (progress: { percent: number }) => void) => {
+      ipcRenderer.on('update:progress', (_event, progress) => callback(progress))
+    }
   }
 }
 

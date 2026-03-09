@@ -7,6 +7,7 @@ import { homedir } from 'os'
 import { ConfigManager } from './config'
 import { testLLMConnection, fetchModels } from './llm-test'
 import { checkPort } from './doctor'
+import { checkForUpdates } from './updater'
 
 const execAsync = promisify(exec)
 
@@ -557,6 +558,12 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
     })
 
     return { ok: true, items }
+  })
+
+  // ── 检查更新 ──
+  ipcMain.handle('updater:check', async () => {
+    checkForUpdates()
+    return { ok: true }
   })
 
   ipcMain.handle('uninstall:execute', async (_e, selectedIds: string[]) => {

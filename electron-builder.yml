@@ -38,3 +38,10 @@ linux:
       arch: [x64]
   icon: build/icon.png
   category: Utility
+
+# 自动更新配置
+publish:
+  provider: github
+  owner: zhan69820
+  repo: OpenClaw-Companion
+  releaseType: release

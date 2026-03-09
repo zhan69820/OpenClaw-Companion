@@ -2,6 +2,7 @@ import { app, BrowserWindow, shell } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerIpcHandlers } from './ipc'
+import { initUpdater, checkForUpdates } from './updater'
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -33,6 +34,14 @@ function createWindow(): void {
   }
 
   registerIpcHandlers(mainWindow)
+
+  // 初始化自动更新
+  initUpdater(mainWindow)
+
+  // 应用启动后延迟检查更新（避免启动时卡顿）
+  setTimeout(() => {
+    checkForUpdates()
+  }, 3000)
 }
 
 app.whenReady().then(() => {

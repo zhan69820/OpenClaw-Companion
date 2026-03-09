@@ -17,7 +17,8 @@ import {
   Sun,
   Save,
   FolderOpen,
-  Globe
+  Globe,
+  RefreshCw
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -76,6 +77,15 @@ function winClose() { window.api.window.close() }
 // 点击页面其他位置关闭语言菜单
 function handleClickOutside() {
   showLangMenu.value = false
+}
+
+// 检查更新
+async function checkForUpdates() {
+  try {
+    await window.api.updater.check()
+  } catch (e) {
+    console.error('Failed to check for updates:', e)
+  }
 }
 
 onMounted(() => {
@@ -240,6 +250,16 @@ onMounted(() => {
               {{ t('sidebar.save') }}
             </button>
           </div>
+
+          <!-- 检查更新按钮 -->
+          <button
+            @click="checkForUpdates"
+            class="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+            title="检查软件更新"
+          >
+            <RefreshCw class="w-3.5 h-3.5" />
+            检查更新
+          </button>
         </div>
       </aside>
 
