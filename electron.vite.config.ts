@@ -6,7 +6,7 @@ import autoprefixer from 'autoprefixer'
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin({ exclude: ['yaml'] })]
+    plugins: [externalizeDepsPlugin({ exclude: ['yaml', 'electron-updater'] })]
   },
   preload: {
     plugins: [externalizeDepsPlugin()]
