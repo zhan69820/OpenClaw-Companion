@@ -3,36 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OpenClaw Companion - AI Bot Configuration Tool</title>
-  <meta name="description" content="Desktop configuration tool for OpenClaw AI bot framework. Supports 18+ LLM providers with visual configuration, backup and migration.">
+  <title>OpenClaw Companion - AI Bot 可视化配置工具</title>
+  <meta name="description" content="OpenClaw AI 机器人框架的桌面可视化配置工具。支持 18+ 大模型，告别手动编辑 YAML，全平台可用。">
+  <meta name="keywords" content="OpenClaw, AI, 机器人, 配置工具, 大模型, ChatGPT, DeepSeek, 通义千问">
   <link rel="icon" type="image/png" href="icon.png">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --bg: #0a0a0f;
-      --bg-card: #12121a;
-      --bg-card-hover: #1a1a26;
+      --bg: #09090b;
+      --bg-alt: #0f0f13;
+      --bg-card: #131318;
+      --bg-card-hover: #1a1a22;
       --border: rgba(255,255,255,0.06);
+      --border-hover: rgba(255,255,255,0.12);
       --text: #e4e4e7;
       --text-muted: #71717a;
+      --text-dim: #52525b;
       --primary: #6366f1;
-      --primary-glow: rgba(99,102,241,0.15);
+      --primary-hover: #5558e6;
+      --primary-glow: rgba(99,102,241,0.12);
+      --primary-glow-strong: rgba(99,102,241,0.25);
       --green: #22c55e;
       --blue: #3b82f6;
-      --shadow: rgba(0,0,0,0.3);
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --purple: #a855f7;
+      --shadow: rgba(0,0,0,0.4);
+      --shadow-lg: rgba(0,0,0,0.6);
     }
 
     [data-theme="light"] {
       --bg: #fafafa;
+      --bg-alt: #f4f4f5;
       --bg-card: #ffffff;
       --bg-card-hover: #f4f4f5;
-      --border: rgba(0,0,0,0.08);
+      --border: rgba(0,0,0,0.07);
+      --border-hover: rgba(0,0,0,0.14);
       --text: #18181b;
       --text-muted: #71717a;
+      --text-dim: #a1a1aa;
       --primary: #4f46e5;
-      --primary-glow: rgba(79,70,229,0.1);
-      --shadow: rgba(0,0,0,0.08);
+      --primary-hover: #4338ca;
+      --primary-glow: rgba(79,70,229,0.08);
+      --primary-glow-strong: rgba(79,70,229,0.15);
+      --shadow: rgba(0,0,0,0.06);
+      --shadow-lg: rgba(0,0,0,0.12);
     }
 
     body {
@@ -42,38 +58,47 @@
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
       transition: background 0.3s, color 0.3s;
+      overflow-x: hidden;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
-    a { color: var(--primary); text-decoration: none; }
-    a:hover { text-decoration: underline; }
+    a { color: var(--primary); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: var(--primary-hover); }
 
     .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── Scroll smooth ── */
+    html { scroll-behavior: smooth; }
 
     /* ── Header ── */
     .header {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      background: var(--bg);
+      background: rgba(9,9,11,0.85);
       backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
       transition: background 0.3s, border-color 0.3s;
     }
+    [data-theme="light"] .header { background: rgba(250,250,250,0.85); }
     .header-inner {
       display: flex; align-items: center; justify-content: space-between;
       height: 60px;
     }
-    .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; cursor: default; }
     .logo-icon {
-      width: 28px; height: 28px; border-radius: 8px;
-      background: var(--primary); display: flex; align-items: center; justify-content: center;
+      width: 30px; height: 30px; border-radius: 8px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex; align-items: center; justify-content: center;
       font-size: 11px; font-weight: 800; color: #fff;
     }
-    .header-controls { display: flex; align-items: center; gap: 12px; }
-    .header-links { display: flex; align-items: center; gap: 24px; }
-    .header-links a { color: var(--text-muted); font-size: 14px; transition: color 0.2s; }
-    .header-links a:hover { color: var(--text); text-decoration: none; }
+    .header-nav { display: flex; align-items: center; gap: 28px; }
+    .header-nav a { color: var(--text-muted); font-size: 14px; font-weight: 500; transition: color 0.2s; text-decoration: none; }
+    .header-nav a:hover { color: var(--text); }
+    .header-controls { display: flex; align-items: center; gap: 10px; }
 
-    /* ── Theme & Lang Toggle ── */
-    .toggle-btn {
+    /* ── Buttons ── */
+    .icon-btn {
       display: flex; align-items: center; justify-content: center;
       width: 36px; height: 36px;
       border-radius: 10px;
@@ -83,11 +108,12 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-    .toggle-btn:hover { background: var(--bg-card-hover); color: var(--text); }
-    .toggle-btn svg { width: 18px; height: 18px; }
+    .icon-btn:hover { background: var(--bg-card-hover); color: var(--text); border-color: var(--border-hover); }
+    .icon-btn svg { width: 18px; height: 18px; }
+
     .lang-btn {
-      display: flex; align-items: center; gap: 4px;
-      padding: 8px 12px;
+      display: flex; align-items: center; gap: 5px;
+      padding: 7px 12px;
       border-radius: 10px;
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -98,17 +124,19 @@
       transition: all 0.2s;
     }
     .lang-btn:hover { background: var(--bg-card-hover); color: var(--text); }
+    .lang-wrapper { position: relative; }
     .lang-menu {
       position: absolute; top: 100%; right: 0; margin-top: 8px;
       padding: 6px;
       border-radius: 12px;
       background: var(--bg-card);
       border: 1px solid var(--border);
-      box-shadow: 0 10px 40px var(--shadow);
+      box-shadow: 0 10px 40px var(--shadow-lg);
       min-width: 120px;
       opacity: 0; visibility: hidden;
-      transform: translateY(-10px);
+      transform: translateY(-8px);
       transition: all 0.2s;
+      z-index: 200;
     }
     .lang-menu.active { opacity: 1; visibility: visible; transform: translateY(0); }
     .lang-option {
@@ -121,11 +149,10 @@
       background: transparent;
       border: none;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.15s;
     }
     .lang-option:hover { background: var(--bg-card-hover); color: var(--text); }
     .lang-option.active { color: var(--primary); background: var(--primary-glow); }
-    .lang-wrapper { position: relative; }
 
     /* ── Hero ── */
     .hero {
@@ -136,42 +163,46 @@
     }
     .hero::before {
       content: '';
-      position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
-      width: 800px; height: 800px;
-      background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+      position: absolute; top: -300px; left: 50%; transform: translateX(-50%);
+      width: 900px; height: 900px;
+      background: radial-gradient(circle, var(--primary-glow-strong) 0%, transparent 65%);
       pointer-events: none;
     }
     .badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 6px 14px; border-radius: 20px;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 16px; border-radius: 20px;
       background: var(--primary-glow);
       border: 1px solid rgba(99,102,241,0.2);
       font-size: 13px; color: var(--primary); font-weight: 500;
-      margin-bottom: 24px;
+      margin-bottom: 28px;
     }
     .badge-dot {
       width: 6px; height: 6px; border-radius: 50%;
       background: var(--green);
       animation: pulse 2s infinite;
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
     .hero h1 {
-      font-size: clamp(36px, 6vw, 56px);
+      font-size: clamp(36px, 5.5vw, 56px);
       font-weight: 800;
       line-height: 1.15;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.025em;
       margin-bottom: 20px;
     }
-    .hero h1 span { color: var(--primary); }
+    .hero h1 span {
+      background: linear-gradient(135deg, #6366f1, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
     .hero-desc {
       font-size: 18px; color: var(--text-muted);
-      max-width: 600px; margin: 0 auto 40px;
-      line-height: 1.7;
+      max-width: 620px; margin: 0 auto 40px;
+      line-height: 1.8;
     }
     .hero-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
     .btn {
       display: inline-flex; align-items: center; gap: 8px;
       padding: 14px 28px; border-radius: 12px;
@@ -181,40 +212,43 @@
     }
     .btn:hover { text-decoration: none; transform: translateY(-1px); }
     .btn-primary {
-      background: var(--primary); color: #fff;
-      box-shadow: 0 4px 20px rgba(99,102,241,0.3);
+      background: linear-gradient(135deg, #6366f1, #7c3aed);
+      color: #fff;
+      box-shadow: 0 4px 24px rgba(99,102,241,0.35);
     }
-    .btn-primary:hover { background: #5558e6; box-shadow: 0 6px 30px rgba(99,102,241,0.4); }
-    .btn-secondary {
-      background: var(--bg-card); color: var(--text);
+    .btn-primary:hover { box-shadow: 0 6px 32px rgba(99,102,241,0.45); color: #fff; }
+    .btn-outline {
+      background: transparent; color: var(--text);
       border: 1px solid var(--border);
     }
-    .btn-secondary:hover { background: var(--bg-card-hover); border-color: rgba(255,255,255,0.12); }
-    [data-theme="light"] .btn-secondary:hover { border-color: rgba(0,0,0,0.15); }
+    .btn-outline:hover { background: var(--bg-card); border-color: var(--border-hover); color: var(--text); }
     .btn svg { width: 18px; height: 18px; }
 
     /* ── Stats ── */
     .stats {
-      display: flex; justify-content: center; gap: 48px;
-      padding: 40px 0; margin-top: 20px;
+      display: flex; justify-content: center; gap: 56px;
+      padding: 48px 0; margin-top: 20px;
     }
     .stat { text-align: center; }
-    .stat-num { font-size: 32px; font-weight: 800; color: var(--primary); }
-    .stat-label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+    .stat-num {
+      font-size: 36px; font-weight: 800;
+      background: linear-gradient(135deg, #6366f1, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-label { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
+
+    /* ── Section ── */
+    .section { padding: 90px 0; }
+    .section-alt { background: var(--bg-alt); }
+    .section-title { text-align: center; margin-bottom: 56px; }
+    .section-title h2 { font-size: 32px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.01em; }
+    .section-title p { font-size: 16px; color: var(--text-muted); max-width: 520px; margin: 0 auto; }
 
     /* ── Features ── */
-    .section { padding: 80px 0; }
-    .section-title {
-      text-align: center; margin-bottom: 48px;
-    }
-    .section-title h2 {
-      font-size: 32px; font-weight: 700; margin-bottom: 12px;
-    }
-    .section-title p {
-      font-size: 16px; color: var(--text-muted); max-width: 500px; margin: 0 auto;
-    }
     .features-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      display: grid; grid-template-columns: repeat(3, 1fr);
       gap: 16px;
     }
     .feature-card {
@@ -227,134 +261,339 @@
     .feature-card:hover {
       background: var(--bg-card-hover);
       border-color: rgba(99,102,241,0.15);
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px var(--shadow);
     }
     .feature-icon {
-      width: 44px; height: 44px; border-radius: 12px;
+      width: 46px; height: 46px; border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
-      margin-bottom: 16px; font-size: 20px;
+      margin-bottom: 16px;
     }
-    .feature-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
-    .feature-card p { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+    .feature-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+    .feature-card p { font-size: 14px; color: var(--text-muted); line-height: 1.75; }
+
+    /* ── Screenshot / Preview ── */
+    .preview-wrapper {
+      max-width: 900px; margin: 0 auto;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 60px var(--shadow-lg);
+      background: var(--bg-card);
+    }
+    .preview-bar {
+      display: flex; align-items: center; gap: 8px;
+      padding: 14px 18px;
+      background: var(--bg-alt);
+      border-bottom: 1px solid var(--border);
+    }
+    .preview-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+    }
+    .preview-content {
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      min-height: 300px;
+    }
+    .preview-mockup {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 20px;
+      width: 100%;
+    }
+    .mock-sidebar {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 20px 16px;
+      border: 1px solid var(--border);
+    }
+    .mock-nav-item {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      transition: all 0.2s;
+    }
+    .mock-nav-item.active {
+      background: var(--primary-glow);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .mock-main {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid var(--border);
+    }
+    .mock-field {
+      display: flex; flex-direction: column; gap: 6px;
+      margin-bottom: 16px;
+    }
+    .mock-label { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .mock-input {
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-size: 13px;
+    }
+    .mock-toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .mock-toggle {
+      width: 36px; height: 20px;
+      border-radius: 10px;
+      position: relative;
+    }
+    .mock-toggle::after {
+      content: ''; position: absolute;
+      width: 16px; height: 16px; border-radius: 50%;
+      top: 2px; background: #fff;
+    }
+    .mock-toggle.on { background: var(--green); }
+    .mock-toggle.on::after { right: 2px; }
+    .mock-toggle.off { background: var(--text-dim); }
+    .mock-toggle.off::after { left: 2px; }
 
     /* ── Providers ── */
     .providers-grid {
       display: flex; flex-wrap: wrap; gap: 10px;
-      justify-content: center; max-width: 700px; margin: 0 auto;
+      justify-content: center; max-width: 720px; margin: 0 auto;
     }
     .provider-tag {
-      padding: 8px 16px; border-radius: 10px;
+      padding: 8px 18px; border-radius: 10px;
       background: var(--bg-card);
       border: 1px solid var(--border);
       font-size: 13px; font-weight: 500;
       transition: all 0.2s;
+      cursor: default;
     }
-    .provider-tag:hover {
-      border-color: var(--primary);
-      background: var(--primary-glow);
-    }
-    .provider-tag.domestic { color: #f59e0b; }
-    .provider-tag.global { color: #3b82f6; }
-    .provider-tag.other { color: #22c55e; }
-    [data-theme="light"] .provider-tag.domestic { color: #d97706; }
-    [data-theme="light"] .provider-tag.global { color: #2563eb; }
+    .provider-tag:hover { border-color: var(--primary); background: var(--primary-glow); }
+    .provider-tag.cn { color: var(--amber); }
+    .provider-tag.intl { color: var(--blue); }
+    .provider-tag.other { color: var(--green); }
+    [data-theme="light"] .provider-tag.cn { color: #d97706; }
+    [data-theme="light"] .provider-tag.intl { color: #2563eb; }
     [data-theme="light"] .provider-tag.other { color: #16a34a; }
 
+    /* ── Tutorial / How to Use ── */
+    .steps-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      counter-reset: step;
+    }
+    .step-card {
+      position: relative;
+      padding: 32px 24px 24px;
+      border-radius: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      text-align: center;
+      counter-increment: step;
+      transition: all 0.3s;
+    }
+    .step-card:hover {
+      border-color: rgba(99,102,241,0.15);
+      transform: translateY(-2px);
+    }
+    .step-num {
+      position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #7c3aed);
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700;
+      box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+    }
+    .step-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 8px auto 16px;
+      font-size: 24px;
+    }
+    .step-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+    .step-card p { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+
     /* ── Download ── */
-    .download-section { background: var(--bg-card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .download-section { background: var(--bg-alt); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
     .download-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      display: grid; grid-template-columns: repeat(3, 1fr);
       gap: 16px;
     }
     .download-card {
-      padding: 28px;
+      padding: 32px 24px;
       border-radius: 16px;
       border: 1px solid var(--border);
-      background: var(--bg);
+      background: var(--bg-card);
       text-align: center;
       transition: all 0.3s;
     }
     .download-card:hover {
       border-color: rgba(99,102,241,0.2);
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px var(--shadow);
     }
-    .download-card .os-icon { font-size: 36px; margin-bottom: 12px; }
-    .download-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
-    .download-card .desc { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+    .download-card .os-icon { margin-bottom: 16px; }
+    .download-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .download-card .os-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
     .download-links { display: flex; flex-direction: column; gap: 8px; }
     .dl-btn {
       display: flex; align-items: center; justify-content: center; gap: 6px;
-      padding: 10px 16px; border-radius: 10px;
+      padding: 11px 16px; border-radius: 10px;
       font-size: 13px; font-weight: 500;
       transition: all 0.2s; text-decoration: none;
     }
-    .dl-btn:hover { text-decoration: none; }
-    .dl-btn-primary { background: var(--primary); color: #fff; }
-    .dl-btn-primary:hover { background: #5558e6; }
-    .dl-btn-secondary { background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border); }
-    .dl-btn-secondary:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
-    [data-theme="light"] .dl-btn-secondary { background: rgba(0,0,0,0.03); }
-    [data-theme="light"] .dl-btn-secondary:hover { border-color: rgba(0,0,0,0.2); }
-    .dl-btn svg { width: 14px; height: 14px; }
-    .mirror-note {
-      text-align: center; margin-top: 24px;
-      font-size: 13px; color: var(--text-muted);
+    .dl-btn:hover { text-decoration: none; transform: translateY(-1px); }
+    .dl-btn-primary {
+      background: linear-gradient(135deg, #6366f1, #7c3aed);
+      color: #fff;
+      box-shadow: 0 2px 12px rgba(99,102,241,0.25);
     }
+    .dl-btn-primary:hover { box-shadow: 0 4px 16px rgba(99,102,241,0.35); color: #fff; }
+    .dl-btn-alt {
+      background: var(--bg); color: var(--text-muted); border: 1px solid var(--border);
+    }
+    .dl-btn-alt:hover { color: var(--text); border-color: var(--border-hover); background: var(--bg-card-hover); }
+    .dl-btn svg { width: 14px; height: 14px; }
+    .dl-size { font-size: 11px; color: var(--text-dim); margin-left: 4px; }
+    .download-tip {
+      text-align: center; margin-top: 28px;
+      font-size: 13px; color: var(--text-dim);
+      line-height: 1.8;
+    }
+    .download-tip a { font-weight: 500; }
 
     /* ── FAQ ── */
-    .faq-list { max-width: 700px; margin: 0 auto; }
+    .faq-list { max-width: 720px; margin: 0 auto; }
     .faq-item {
-      padding: 20px 0;
       border-bottom: 1px solid var(--border);
+      overflow: hidden;
     }
-    .faq-item:last-child { border-bottom: none; }
-    .faq-q { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
-    .faq-a { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+    .faq-q {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 0;
+      font-size: 15px; font-weight: 600;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .faq-q:hover { color: var(--primary); }
+    .faq-q svg { width: 18px; height: 18px; color: var(--text-dim); flex-shrink: 0; transition: transform 0.3s; }
+    .faq-item.open .faq-q svg { transform: rotate(180deg); }
+    .faq-a {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+    .faq-item.open .faq-a { max-height: 200px; }
+    .faq-a-inner {
+      padding-bottom: 20px;
+      font-size: 14px; color: var(--text-muted); line-height: 1.8;
+    }
+
+    /* ── Contact ── */
+    .contact-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      max-width: 800px; margin: 0 auto;
+    }
+    .contact-card {
+      padding: 28px 20px;
+      border-radius: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .contact-card:hover { border-color: rgba(99,102,241,0.15); transform: translateY(-2px); }
+    .contact-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px;
+      font-size: 22px;
+    }
+    .contact-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .contact-card p { font-size: 13px; color: var(--text-muted); line-height: 1.6; word-break: break-all; }
 
     /* ── Footer ── */
     .footer {
-      padding: 40px 0;
-      text-align: center;
+      padding: 48px 0 36px;
       border-top: 1px solid var(--border);
+      text-align: center;
     }
-    .footer p { font-size: 13px; color: var(--text-muted); }
-    .footer-links { margin-top: 12px; display: flex; gap: 20px; justify-content: center; }
-    .footer-links a { font-size: 13px; color: var(--text-muted); }
+    .footer-brand { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+    .footer p { font-size: 13px; color: var(--text-dim); }
+    .footer-links {
+      margin-top: 16px; display: flex; gap: 24px; justify-content: center;
+    }
+    .footer-links a { font-size: 13px; color: var(--text-muted); text-decoration: none; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { margin-top: 20px; font-size: 12px; color: var(--text-dim); }
+
+    /* ── Animations ── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
 
     /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .steps-grid { grid-template-columns: repeat(2, 1fr); }
+      .download-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+      .contact-grid { grid-template-columns: 1fr; max-width: 360px; }
+      .preview-mockup { grid-template-columns: 1fr; }
+      .mock-sidebar { display: none; }
+    }
     @media (max-width: 768px) {
-      .header-links { display: none; }
-      .stats { gap: 24px; }
-      .stat-num { font-size: 24px; }
+      .header-nav { display: none; }
+      .stats { gap: 28px; }
+      .stat-num { font-size: 28px; }
       .hero { padding: 120px 0 60px; }
-      .section { padding: 60px 0; }
+      .section { padding: 64px 0; }
     }
     @media (max-width: 480px) {
       .hero-buttons { flex-direction: column; align-items: center; }
       .btn { width: 100%; justify-content: center; }
-      .stats { flex-direction: column; gap: 16px; }
-      .header-controls { gap: 8px; }
+      .stats { flex-direction: column; gap: 14px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .header-controls { gap: 6px; }
       .lang-btn { padding: 6px 10px; font-size: 12px; }
     }
   </style>
 </head>
 <body>
 
-<!-- Header -->
+<!-- ===== Header ===== -->
 <header class="header">
   <div class="container header-inner">
     <div class="logo">
       <div class="logo-icon">OC</div>
-      OpenClaw Companion
+      <span>OpenClaw Companion</span>
     </div>
-    <nav class="header-links">
+    <nav class="header-nav">
       <a href="#features" data-i18n="nav.features">功能</a>
+      <a href="#preview" data-i18n="nav.preview">预览</a>
+      <a href="#tutorial" data-i18n="nav.tutorial">使用教程</a>
       <a href="#download" data-i18n="nav.download">下载</a>
       <a href="#faq" data-i18n="nav.faq">常见问题</a>
-      <a href="https://github.com/zhan69820/OpenClaw-Companion" target="_blank">GitHub</a>
     </nav>
     <div class="header-controls">
-      <button class="toggle-btn" id="themeToggle" title="切换主题">
+      <button class="icon-btn" id="themeToggle" title="Toggle Theme">
         <svg id="moonIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <svg id="sunIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
       </button>
@@ -373,7 +612,7 @@
   </div>
 </header>
 
-<!-- Hero -->
+<!-- ===== Hero ===== -->
 <section class="hero">
   <div class="container">
     <div class="badge">
@@ -385,20 +624,20 @@
       可视化桌面配置工具，告别手动编辑 YAML。支持 18+ 大模型提供商，一键配置、备份、迁移，全平台可用。
     </p>
     <div class="hero-buttons">
-      <a href="#download" class="btn btn-primary">
+      <a href="#download" class="btn btn-primary" id="heroDownloadBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        <span data-i18n="hero.downloadBtn">立即下载</span>
+        <span data-i18n="hero.downloadBtn">免费下载</span>
       </a>
-      <a href="https://github.com/zhan69820/OpenClaw-Companion" target="_blank" class="btn btn-secondary">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-        GitHub
+      <a href="#features" class="btn btn-outline">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 16 16 12 12 8"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <span data-i18n="hero.learnMore">了解更多</span>
       </a>
     </div>
 
     <div class="stats">
       <div class="stat">
         <div class="stat-num">18+</div>
-        <div class="stat-label" data-i18n="stats.models">支持的大模型</div>
+        <div class="stat-label" data-i18n="stats.models">支持大模型</div>
       </div>
       <div class="stat">
         <div class="stat-num">8</div>
@@ -408,128 +647,233 @@
         <div class="stat-num">3</div>
         <div class="stat-label" data-i18n="stats.platforms">操作系统</div>
       </div>
+      <div class="stat">
+        <div class="stat-num">100%</div>
+        <div class="stat-label" data-i18n="stats.free">免费使用</div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- Features -->
-<section class="section" id="features">
+<!-- ===== Features ===== -->
+<section class="section section-alt" id="features">
   <div class="container">
-    <div class="section-title">
+    <div class="section-title fade-up">
       <h2 data-i18n="features.title">核心功能</h2>
       <p data-i18n="features.subtitle">从安装到运维，一站式管理你的 OpenClaw 实例</p>
     </div>
 
-    <div class="features-grid">
+    <div class="features-grid fade-up">
       <div class="feature-card">
         <div class="feature-icon" style="background:rgba(99,102,241,0.1)">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M12 2a4 4 0 014 4c0 1.95-1.4 3.58-3.25 3.93"/><path d="M8 6a4 4 0 018 0"/><path d="M12 18v4"/><path d="M8 22h8"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
         </div>
-        <h3 data-i18n="features.visualConfig">可视化模型配置</h3>
-        <p data-i18n="features.visualConfigDesc">支持 18+ 主流大模型提供商，填入 API Key 即可使用。自动获取模型列表，智能推荐最佳模型。</p>
+        <h3 data-i18n="f.visual">可视化模型配置</h3>
+        <p data-i18n="f.visualDesc">支持 18+ 主流大模型提供商，填入 API Key 即可使用。自动获取模型列表，智能推荐最佳模型。</p>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon" style="background:rgba(59,130,246,0.1)">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.4"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.4"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg>
         </div>
-        <h3 data-i18n="features.channels">多频道通信管理</h3>
-        <p data-i18n="features.channelsDesc">飞书、企微、QQ、钉钉、Telegram、Discord、Slack、WhatsApp 一键开关配置。</p>
+        <h3 data-i18n="f.channel">多频道通信管理</h3>
+        <p data-i18n="f.channelDesc">飞书、企微、QQ、钉钉、Telegram、Discord、Slack、WhatsApp 一键开关配置。</p>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon" style="background:rgba(34,197,94,0.1)">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/><path d="M6 12h12"/><path d="M6 16h8"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
         </div>
-        <h3 data-i18n="features.service">服务启停管理</h3>
-        <p data-i18n="features.serviceDesc">一键启动、停止 OpenClaw。实时查看运行日志，状态自动监控刷新。</p>
+        <h3 data-i18n="f.service">服务启停与日志</h3>
+        <p data-i18n="f.serviceDesc">一键启动、停止 OpenClaw 服务。实时查看运行日志，状态自动监控刷新。</p>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon" style="background:rgba(245,158,11,0.1)">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         </div>
-        <h3 data-i18n="features.backup">备份与迁移</h3>
-        <p data-i18n="features.backupDesc">一键备份配置、记忆、历史数据。自动定时备份（每天/每周/每月），跨设备迁移指南。</p>
+        <h3 data-i18n="f.backup">备份与迁移</h3>
+        <p data-i18n="f.backupDesc">一键备份配置、记忆、历史数据。支持定时备份，跨设备迁移轻松搞定。</p>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon" style="background:rgba(239,68,68,0.1)">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M4.8 2.3A.3.3 0 105 2H4a2 2 0 00-2 2v5c0 .6.4 1 1 1h3"/><path d="M2 17v2a2 2 0 002 2h16a2 2 0 002-2v-7.4"/><path d="M22 12l-4-4-4 4"/><path d="M18 12v6"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
-        <h3 data-i18n="features.diagnosis">故障急救</h3>
-        <p data-i18n="features.diagnosisDesc">自动诊断配置文件、端口占用、模型连通性。快速定位问题，不用再翻日志。</p>
+        <h3 data-i18n="f.diag">故障诊断</h3>
+        <p data-i18n="f.diagDesc">自动检测配置文件、端口占用、模型连通性。快速定位问题，不用再翻日志。</p>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon" style="background:rgba(168,85,247,0.1)">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><path d="M12 3v18"/><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M2 8h20"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 8l3 3-3 3"/><line x1="13" y1="14" x2="17" y2="14"/></svg>
         </div>
-        <h3 data-i18n="features.crossPlatform">全平台支持</h3>
-        <p data-i18n="features.crossPlatformDesc">Windows、macOS（Intel + Apple Silicon）、Linux。自动检测更新，保持最新版本。</p>
+        <h3 data-i18n="f.cross">全平台 + 自动更新</h3>
+        <p data-i18n="f.crossDesc">Windows、macOS（Intel + Apple Silicon）、Linux 全平台覆盖。内置自动更新，始终保持最新版。</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Supported Models -->
-<section class="section">
+<!-- ===== App Preview ===== -->
+<section class="section" id="preview">
   <div class="container">
-    <div class="section-title">
+    <div class="section-title fade-up">
+      <h2 data-i18n="preview.title">界面预览</h2>
+      <p data-i18n="preview.subtitle">直观的操作界面，上手即用</p>
+    </div>
+
+    <div class="preview-wrapper fade-up">
+      <div class="preview-bar">
+        <div class="preview-dot" style="background:#ef4444"></div>
+        <div class="preview-dot" style="background:#f59e0b"></div>
+        <div class="preview-dot" style="background:#22c55e"></div>
+      </div>
+      <div class="preview-content">
+        <div class="preview-mockup">
+          <div class="mock-sidebar">
+            <div class="mock-nav-item active" data-i18n="mock.models">模型配置</div>
+            <div class="mock-nav-item" data-i18n="mock.channels">频道管理</div>
+            <div class="mock-nav-item" data-i18n="mock.service">服务管理</div>
+            <div class="mock-nav-item" data-i18n="mock.backup">备份迁移</div>
+            <div class="mock-nav-item" data-i18n="mock.settings">系统设置</div>
+          </div>
+          <div class="mock-main">
+            <div class="mock-field">
+              <span class="mock-label" data-i18n="mock.provider">模型提供商</span>
+              <div class="mock-input">DeepSeek</div>
+            </div>
+            <div class="mock-field">
+              <span class="mock-label">API Key</span>
+              <div class="mock-input">sk-••••••••••••••••••••</div>
+            </div>
+            <div class="mock-field">
+              <span class="mock-label" data-i18n="mock.model">模型选择</span>
+              <div class="mock-input">deepseek-chat</div>
+            </div>
+            <div style="margin-top: 8px">
+              <div class="mock-toggle-row">
+                <span data-i18n="mock.stream">流式输出</span>
+                <div class="mock-toggle on"></div>
+              </div>
+              <div class="mock-toggle-row">
+                <span data-i18n="mock.memory">对话记忆</span>
+                <div class="mock-toggle on"></div>
+              </div>
+              <div class="mock-toggle-row">
+                <span data-i18n="mock.log">日志记录</span>
+                <div class="mock-toggle off"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Supported Models ===== -->
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-title fade-up">
       <h2 data-i18n="models.title">支持的大模型</h2>
       <p data-i18n="models.subtitle">覆盖国内外主流大模型提供商</p>
     </div>
-
-    <div class="providers-grid">
-      <div class="provider-tag domestic">通义千问</div>
-      <div class="provider-tag domestic">DeepSeek</div>
-      <div class="provider-tag domestic">Kimi</div>
-      <div class="provider-tag domestic">智谱 GLM</div>
-      <div class="provider-tag domestic">文心一言</div>
-      <div class="provider-tag domestic">豆包</div>
-      <div class="provider-tag domestic">讯飞星火</div>
-      <div class="provider-tag domestic">零一万物</div>
-      <div class="provider-tag domestic">MiniMax</div>
-      <div class="provider-tag domestic">腾讯混元</div>
-      <div class="provider-tag domestic">硅基流动</div>
-      <div class="provider-tag domestic">阶跃星辰</div>
-      <div class="provider-tag global">OpenAI</div>
-      <div class="provider-tag global">Claude</div>
-      <div class="provider-tag global">Gemini</div>
-      <div class="provider-tag global">Grok</div>
-      <div class="provider-tag global">Mistral</div>
+    <div class="providers-grid fade-up">
+      <div class="provider-tag cn">通义千问</div>
+      <div class="provider-tag cn">DeepSeek</div>
+      <div class="provider-tag cn">Kimi</div>
+      <div class="provider-tag cn">智谱 GLM</div>
+      <div class="provider-tag cn">文心一言</div>
+      <div class="provider-tag cn">豆包</div>
+      <div class="provider-tag cn">讯飞星火</div>
+      <div class="provider-tag cn">零一万物</div>
+      <div class="provider-tag cn">MiniMax</div>
+      <div class="provider-tag cn">腾讯混元</div>
+      <div class="provider-tag cn">硅基流动</div>
+      <div class="provider-tag cn">阶跃星辰</div>
+      <div class="provider-tag intl">OpenAI</div>
+      <div class="provider-tag intl">Claude</div>
+      <div class="provider-tag intl">Gemini</div>
+      <div class="provider-tag intl">Grok</div>
+      <div class="provider-tag intl">Mistral</div>
       <div class="provider-tag other">OpenRouter</div>
       <div class="provider-tag other">Ollama</div>
     </div>
   </div>
 </section>
 
-<!-- Download -->
-<section class="section download-section" id="download">
+<!-- ===== Tutorial ===== -->
+<section class="section" id="tutorial">
   <div class="container">
-    <div class="section-title">
-      <h2 data-i18n="download.title">下载安装</h2>
-      <p data-i18n="download.subtitle">选择你的操作系统，一键安装即可使用</p>
+    <div class="section-title fade-up">
+      <h2 data-i18n="tut.title">快速上手</h2>
+      <p data-i18n="tut.subtitle">四步完成配置，简单到不需要文档</p>
     </div>
 
-    <div class="download-grid">
+    <div class="steps-grid fade-up">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-icon" style="background:rgba(99,102,241,0.1)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <h3 data-i18n="tut.s1">下载安装</h3>
+        <p data-i18n="tut.s1d">下载对应系统的安装包，双击安装即可。</p>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-icon" style="background:rgba(59,130,246,0.1)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </div>
+        <h3 data-i18n="tut.s2">选择模型</h3>
+        <p data-i18n="tut.s2d">选择大模型提供商，填入你的 API Key。</p>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-icon" style="background:rgba(34,197,94,0.1)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.4"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.4"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg>
+        </div>
+        <h3 data-i18n="tut.s3">配置频道</h3>
+        <p data-i18n="tut.s3d">开启需要的通信频道，填入 Token 即可接入。</p>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">4</div>
+        <div class="step-icon" style="background:rgba(168,85,247,0.1)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>
+        <h3 data-i18n="tut.s4">启动服务</h3>
+        <p data-i18n="tut.s4d">点击启动按钮，你的 AI 机器人就上线了。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Download ===== -->
+<section class="section download-section" id="download">
+  <div class="container">
+    <div class="section-title fade-up">
+      <h2 data-i18n="dl.title">免费下载</h2>
+      <p data-i18n="dl.subtitle">选择你的操作系统，一键安装即可使用</p>
+    </div>
+
+    <div class="download-grid fade-up">
       <!-- Windows -->
       <div class="download-card">
         <div class="os-icon">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="#0078d4"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
+          <svg width="42" height="42" viewBox="0 0 24 24" fill="#0078d4"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
         </div>
         <h3>Windows</h3>
-        <p class="desc">Windows 10 / 11 (64-bit)</p>
+        <p class="os-desc">Windows 10 / 11 (64-bit)</p>
         <div class="download-links">
-          <a class="dl-btn dl-btn-primary" href="https://github.com/zhan69820/OpenClaw-Companion/releases/latest/download/OpenClaw-Companion-Setup-1.0.0-beta.exe">
+          <a class="dl-btn dl-btn-primary" href="https://dl.openclaw.n8ndx.com/v1.0.0-beta/OpenClaw.Companion.Setup.1.0.0-beta.exe">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            <span data-i18n="download.installer">安装版 (.exe)</span>
+            <span data-i18n="dl.installer">安装版 (.exe)</span>
           </a>
-          <a class="dl-btn dl-btn-secondary" href="https://github.com/zhan69820/OpenClaw-Companion/releases/latest/download/OpenClaw-Companion-1.0.0-beta.exe">
-            <span data-i18n="download.portable">便携版 (.exe) 免安装</span>
-          </a>
-          <a class="dl-btn dl-btn-secondary" href="https://openclaw.n8ndx.com/downloads/OpenClaw-Companion-Setup-1.0.0-beta.exe">
-            <span data-i18n="download.mirror">国内镜像下载</span>
+          <a class="dl-btn dl-btn-alt" href="https://dl.openclaw.n8ndx.com/v1.0.0-beta/OpenClaw.Companion.1.0.0-beta.exe">
+            <span data-i18n="dl.portable">便携版 (.exe) 免安装</span>
           </a>
         </div>
       </div>
@@ -537,20 +881,17 @@
       <!-- macOS -->
       <div class="download-card">
         <div class="os-icon">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="#999"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          <svg width="42" height="42" viewBox="0 0 24 24" fill="var(--text-muted)"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
         </div>
         <h3>macOS</h3>
-        <p class="desc">Intel & Apple Silicon</p>
+        <p class="os-desc">Intel & Apple Silicon</p>
         <div class="download-links">
-          <a class="dl-btn dl-btn-primary" href="https://github.com/zhan69820/OpenClaw-Companion/releases/latest/download/OpenClaw-Companion-1.0.0-beta.dmg">
+          <a class="dl-btn dl-btn-primary" href="https://dl.openclaw.n8ndx.com/v1.0.0-beta/OpenClaw.Companion-1.0.0-beta.dmg">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Intel (.dmg)
           </a>
-          <a class="dl-btn dl-btn-secondary" href="https://github.com/zhan69820/OpenClaw-Companion/releases/latest/download/OpenClaw-Companion-1.0.0-beta-arm64.dmg">
+          <a class="dl-btn dl-btn-alt" href="https://dl.openclaw.n8ndx.com/v1.0.0-beta/OpenClaw.Companion-1.0.0-beta-arm64.dmg">
             Apple Silicon (.dmg)
-          </a>
-          <a class="dl-btn dl-btn-secondary" href="https://openclaw.n8ndx.com/downloads/OpenClaw-Companion-1.0.0-beta.dmg">
-            <span data-i18n="download.mirror">国内镜像下载</span>
           </a>
         </div>
       </div>
@@ -558,303 +899,402 @@
       <!-- Linux -->
       <div class="download-card">
         <div class="os-icon">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489.117.811.465 1.541 1.054 2.045.622.532 1.395.772 2.138.772.39 0 .77-.073 1.11-.218.34-.144.637-.36.865-.627.05-.058.1-.116.147-.175.131-.16.249-.33.353-.51.212-.37.374-.78.474-1.233.096-.433.13-.905.078-1.406-.093-.854-.41-1.835-.766-2.812-.357-.977-.755-1.969-.755-1.969s.422-.255 1.09-.529c.668-.274 1.586-.563 2.694-.563 1.107 0 2.025.289 2.694.563.667.274 1.09.529 1.09.529s-.398.992-.755 1.969c-.356.977-.673 1.958-.766 2.812-.052.501-.018.973.078 1.406.1.453.262.863.474 1.233.104.18.222.35.353.51.047.059.097.117.147.175.228.267.525.483.865.627.34.145.72.218 1.11.218.743 0 1.516-.24 2.138-.772.589-.504.937-1.234 1.054-2.045.123-.805-.009-1.657-.287-2.489-.589-1.771-1.831-3.47-2.716-4.521-.75-1.067-.974-1.928-1.05-3.02-.065-1.491 1.056-5.965-3.17-6.298C12.82.008 12.66 0 12.504 0z"/></svg>
+          <svg width="42" height="42" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489.117.811.465 1.541 1.054 2.045.622.532 1.395.772 2.138.772.39 0 .77-.073 1.11-.218.34-.144.637-.36.865-.627.05-.058.1-.116.147-.175.131-.16.249-.33.353-.51.212-.37.374-.78.474-1.233.096-.433.13-.905.078-1.406-.093-.854-.41-1.835-.766-2.812-.357-.977-.755-1.969-.755-1.969s.422-.255 1.09-.529c.668-.274 1.586-.563 2.694-.563 1.107 0 2.025.289 2.694.563.667.274 1.09.529 1.09.529s-.398.992-.755 1.969c-.356.977-.673 1.958-.766 2.812-.052.501-.018.973.078 1.406.1.453.262.863.474 1.233.104.18.222.35.353.51.047.059.097.117.147.175.228.267.525.483.865.627.34.145.72.218 1.11.218.743 0 1.516-.24 2.138-.772.589-.504.937-1.234 1.054-2.045.123-.805-.009-1.657-.287-2.489-.589-1.771-1.831-3.47-2.716-4.521-.75-1.067-.974-1.928-1.05-3.02-.065-1.491 1.056-5.965-3.17-6.298C12.82.008 12.66 0 12.504 0z"/></svg>
         </div>
         <h3>Linux</h3>
-        <p class="desc">Ubuntu / Debian / Fedora / Arch</p>
+        <p class="os-desc">Ubuntu / Debian / Fedora / Arch</p>
         <div class="download-links">
-          <a class="dl-btn dl-btn-primary" href="https://github.com/zhan69820/OpenClaw-Companion/releases/latest/download/OpenClaw.Companion-1.0.0-beta.AppImage">
+          <a class="dl-btn dl-btn-primary" href="https://dl.openclaw.n8ndx.com/v1.0.0-beta/OpenClaw.Companion-1.0.0-beta.AppImage">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            AppImage <span data-i18n="download.universal">通用版</span>
+            AppImage <span data-i18n="dl.universal">通用版</span>
           </a>
-          <a class="dl-btn dl-btn-secondary" href="https://github.com/zhan69820/OpenClaw-Companion/releases/latest/download/openclaw-companion_1.0.0-beta_amd64.deb">
-            deb <span data-i18n="download.ubuntu">安装包 (Ubuntu/Debian)</span>
-          </a>
-          <a class="dl-btn dl-btn-secondary" href="https://openclaw.n8ndx.com/downloads/OpenClaw.Companion-1.0.0-beta.AppImage">
-            <span data-i18n="download.mirror">国内镜像下载</span>
+          <a class="dl-btn dl-btn-alt" href="https://dl.openclaw.n8ndx.com/v1.0.0-beta/openclaw-companion_1.0.0-beta_amd64.deb">
+            .deb (Ubuntu / Debian)
           </a>
         </div>
       </div>
     </div>
 
-    <p class="mirror-note" data-i18n="download.mirrorNote">
-      GitHub 下载慢？试试国内镜像下载。镜像文件由 openclaw.n8ndx.com 提供加速。
-    </p>
+    <div class="download-tip fade-up">
+      <p data-i18n="dl.tip">所有安装包均从 CDN 高速下载，国内外用户均可流畅访问。</p>
+      <p data-i18n="dl.tip2" style="margin-top:4px">macOS 首次打开如提示"无法验证开发者"，请右键点击应用 → 选择"打开"即可。</p>
+    </div>
   </div>
 </section>
 
-<!-- FAQ -->
+<!-- ===== FAQ ===== -->
 <section class="section" id="faq">
   <div class="container">
-    <div class="section-title">
+    <div class="section-title fade-up">
       <h2 data-i18n="faq.title">常见问题</h2>
     </div>
 
-    <div class="faq-list">
+    <div class="faq-list fade-up">
       <div class="faq-item">
-        <div class="faq-q" data-i18n="faq.q1">OpenClaw Companion 是什么？</div>
-        <div class="faq-a" data-i18n="faq.a1">OpenClaw Companion 是 OpenClaw AI 机器人框架的桌面配置管理工具。它让你不用手动编辑 YAML 文件就能完成所有配置，包括模型选择、频道绑定、备份迁移等操作。</div>
+        <div class="faq-q">
+          <span data-i18n="faq.q1">OpenClaw Companion 是什么？</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq.a1">OpenClaw Companion 是 OpenClaw AI 机器人框架的桌面配置管理工具。它让你不用手动编辑 YAML 文件就能完成所有配置，包括模型选择、频道绑定、备份迁移等操作。</div></div>
       </div>
       <div class="faq-item">
-        <div class="faq-q" data-i18n="faq.q2">使用前需要先安装 OpenClaw 吗？</div>
-        <div class="faq-a" data-i18n="faq.a2">不需要。Companion 内置了 OpenClaw 安装检测功能，首次启动会引导你安装。你只需要确保系统已安装 Node.js 22+。</div>
+        <div class="faq-q">
+          <span data-i18n="faq.q2">需要先安装 OpenClaw 吗？</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq.a2">不需要。Companion 内置了 OpenClaw 安装检测功能，首次启动会引导你安装。你只需要确保系统已安装 Node.js 22+。</div></div>
       </div>
       <div class="faq-item">
-        <div class="faq-q" data-i18n="faq.q3">支持哪些操作系统？</div>
-        <div class="faq-a" data-i18n="faq.a3">支持 Windows 10/11 (64-bit)、macOS (Intel 和 Apple Silicon)、Linux (Ubuntu、Debian、Fedora、Arch 等主流发行版)。</div>
+        <div class="faq-q">
+          <span data-i18n="faq.q3">支持哪些操作系统？</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq.a3">支持 Windows 10/11 (64-bit)、macOS (Intel 和 Apple Silicon)、Linux (Ubuntu、Debian、Fedora、Arch 等主流发行版)。</div></div>
       </div>
       <div class="faq-item">
-        <div class="faq-q" data-i18n="faq.q4">配置的数据存储在哪里？</div>
-        <div class="faq-a" data-i18n="faq.a4">所有配置数据存储在用户目录下的 ~/.openclaw/ 文件夹中，包括模型配置、频道设置、对话记忆等。你可以随时通过备份功能导出。</div>
+        <div class="faq-q">
+          <span data-i18n="faq.q4">配置数据存在哪里？安全吗？</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq.a4">所有数据（模型配置、频道设置、对话记忆等）存储在你本地电脑的 ~/.openclaw/ 目录中，不会上传到任何服务器。你可以随时通过备份功能导出。</div></div>
       </div>
       <div class="faq-item">
-        <div class="faq-q" data-i18n="faq.q5">macOS 打开时提示"无法验证开发者"怎么办？</div>
-        <div class="faq-a" data-i18n="faq.a5">右键点击应用 → 选择"打开" → 在弹窗中点击"打开"即可。这是因为应用未经 Apple 公证签名，不影响使用。</div>
+        <div class="faq-q">
+          <span data-i18n="faq.q5">macOS 提示"无法验证开发者"怎么办？</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq.a5">右键点击应用 → 选择"打开" → 在弹窗中点击"打开"即可。这是因为应用未经 Apple 公证签名，不影响正常使用。</div></div>
       </div>
       <div class="faq-item">
-        <div class="faq-q" data-i18n="faq.q6">如何反馈问题或建议？</div>
-        <div class="faq-a" data-i18n="faq.a6">请在 GitHub Issues 中提交，描述你的操作系统、问题现象和复现步骤，我们会尽快处理。</div>
+        <div class="faq-q">
+          <span data-i18n="faq.q6">完全免费吗？</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq.a6">是的，OpenClaw Companion 完全免费，没有任何付费功能或内购。你需要自备大模型的 API Key（部分模型有免费额度）。</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">
+          <span data-i18n="faq.q7">如何获取更新？</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq.a7">应用内置自动更新功能，有新版本时会弹窗提醒。你也可以在侧边栏手动点击"检查更新"。</div></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Footer -->
+<!-- ===== Contact ===== -->
+<section class="section section-alt" id="contact">
+  <div class="container">
+    <div class="section-title fade-up">
+      <h2 data-i18n="ct.title">联系我们</h2>
+      <p data-i18n="ct.subtitle">遇到问题或有建议？随时联系</p>
+    </div>
+
+    <div class="contact-grid fade-up">
+      <div class="contact-card">
+        <div class="contact-icon" style="background:rgba(59,130,246,0.1)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <h3 data-i18n="ct.email">邮件反馈</h3>
+        <p>support@openclaw.n8ndx.com</p>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon" style="background:rgba(34,197,94,0.1)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        </div>
+        <h3 data-i18n="ct.community">社区交流</h3>
+        <p data-i18n="ct.communityDesc">QQ 群 / 微信群<br>(即将开放)</p>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon" style="background:rgba(168,85,247,0.1)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <h3 data-i18n="ct.faq">帮助文档</h3>
+        <p data-i18n="ct.faqDesc">查看上方 FAQ 或<br>发邮件咨询</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Footer ===== -->
 <footer class="footer">
   <div class="container">
-    <p>OpenClaw Companion v1.0.0-beta &middot; MIT License</p>
+    <div class="footer-brand">OpenClaw Companion</div>
+    <p data-i18n="ft.desc">AI 机器人配置，从未如此简单</p>
     <div class="footer-links">
-      <a href="https://github.com/zhan69820/OpenClaw-Companion" target="_blank">GitHub</a>
-      <a href="https://github.com/zhan69820/OpenClaw-Companion/issues" target="_blank" data-i18n="footer.issues">反馈问题</a>
-      <a href="https://github.com/zhan69820/OpenClaw-Companion/releases" target="_blank" data-i18n="footer.releases">版本历史</a>
+      <a href="#features" data-i18n="nav.features">功能</a>
+      <a href="#download" data-i18n="nav.download">下载</a>
+      <a href="#faq" data-i18n="nav.faq">常见问题</a>
+      <a href="#contact" data-i18n="ct.title">联系我们</a>
+    </div>
+    <div class="footer-copy">
+      <p>&copy; 2025 OpenClaw Companion. <span data-i18n="ft.rights">All rights reserved.</span></p>
     </div>
   </div>
 </footer>
 
 <script>
-// Translations
-const i18n = {
+// ===== Anti DevTools (basic deterrents) =====
+(function(){
+  // Disable right-click
+  document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+
+  // Disable keyboard shortcuts for DevTools
+  document.addEventListener('keydown', function(e){
+    // F12
+    if(e.key === 'F12') { e.preventDefault(); return false; }
+    // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C
+    if(e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key)) { e.preventDefault(); return false; }
+    // Ctrl+U (view source)
+    if(e.ctrlKey && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); return false; }
+    // Cmd+Option+I (macOS)
+    if(e.metaKey && e.altKey && (e.key === 'i' || e.key === 'I')) { e.preventDefault(); return false; }
+    // Cmd+Option+J (macOS)
+    if(e.metaKey && e.altKey && (e.key === 'j' || e.key === 'J')) { e.preventDefault(); return false; }
+    // Cmd+Option+U (macOS view source)
+    if(e.metaKey && e.altKey && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); return false; }
+  });
+
+  // Debugger detection via timing
+  var threshold = 160;
+  setInterval(function(){
+    var start = performance.now();
+    (function(){}).constructor('debugger')();
+    if(performance.now() - start > threshold){
+      document.body.innerHTML = '';
+      window.location.reload();
+    }
+  }, 1000);
+})();
+
+// ===== i18n =====
+var i18n = {
   zh: {
-    'nav.features': '功能',
-    'nav.download': '下载',
-    'nav.faq': '常见问题',
-    'hero.badge': 'v1.0.0-beta 公测中',
-    'hero.title': '让 <span>OpenClaw</span> 配置<br>变得简单',
-    'hero.desc': '可视化桌面配置工具，告别手动编辑 YAML。支持 18+ 大模型提供商，一键配置、备份、迁移，全平台可用。',
-    'hero.downloadBtn': '立即下载',
-    'stats.models': '支持的大模型',
-    'stats.channels': '通信频道',
-    'stats.platforms': '操作系统',
-    'features.title': '核心功能',
-    'features.subtitle': '从安装到运维，一站式管理你的 OpenClaw 实例',
-    'features.visualConfig': '可视化模型配置',
-    'features.visualConfigDesc': '支持 18+ 主流大模型提供商，填入 API Key 即可使用。自动获取模型列表，智能推荐最佳模型。',
-    'features.channels': '多频道通信管理',
-    'features.channelsDesc': '飞书、企微、QQ、钉钉、Telegram、Discord、Slack、WhatsApp 一键开关配置。',
-    'features.service': '服务启停管理',
-    'features.serviceDesc': '一键启动、停止 OpenClaw。实时查看运行日志，状态自动监控刷新。',
-    'features.backup': '备份与迁移',
-    'features.backupDesc': '一键备份配置、记忆、历史数据。自动定时备份（每天/每周/每月），跨设备迁移指南。',
-    'features.diagnosis': '故障急救',
-    'features.diagnosisDesc': '自动诊断配置文件、端口占用、模型连通性。快速定位问题，不用再翻日志。',
-    'features.crossPlatform': '全平台支持',
-    'features.crossPlatformDesc': 'Windows、macOS（Intel + Apple Silicon）、Linux。自动检测更新，保持最新版本。',
-    'models.title': '支持的大模型',
-    'models.subtitle': '覆盖国内外主流大模型提供商',
-    'download.title': '下载安装',
-    'download.subtitle': '选择你的操作系统，一键安装即可使用',
-    'download.installer': '安装版 (.exe)',
-    'download.portable': '便携版 (.exe) 免安装',
-    'download.mirror': '国内镜像下载',
-    'download.universal': '通用版',
-    'download.ubuntu': '安装包 (Ubuntu/Debian)',
-    'download.mirrorNote': 'GitHub 下载慢？试试国内镜像下载。镜像文件由 openclaw.n8ndx.com 提供加速。',
-    'faq.title': '常见问题',
-    'faq.q1': 'OpenClaw Companion 是什么？',
-    'faq.a1': 'OpenClaw Companion 是 OpenClaw AI 机器人框架的桌面配置管理工具。它让你不用手动编辑 YAML 文件就能完成所有配置，包括模型选择、频道绑定、备份迁移等操作。',
-    'faq.q2': '使用前需要先安装 OpenClaw 吗？',
-    'faq.a2': '不需要。Companion 内置了 OpenClaw 安装检测功能，首次启动会引导你安装。你只需要确保系统已安装 Node.js 22+。',
-    'faq.q3': '支持哪些操作系统？',
-    'faq.a3': '支持 Windows 10/11 (64-bit)、macOS (Intel 和 Apple Silicon)、Linux (Ubuntu、Debian、Fedora、Arch 等主流发行版)。',
-    'faq.q4': '配置的数据存储在哪里？',
-    'faq.a4': '所有配置数据存储在用户目录下的 ~/.openclaw/ 文件夹中，包括模型配置、频道设置、对话记忆等。你可以随时通过备份功能导出。',
-    'faq.q5': 'macOS 打开时提示"无法验证开发者"怎么办？',
-    'faq.a5': '右键点击应用 → 选择"打开" → 在弹窗中点击"打开"即可。这是因为应用未经 Apple 公证签名，不影响使用。',
-    'faq.q6': '如何反馈问题或建议？',
-    'faq.a6': '请在 GitHub Issues 中提交，描述你的操作系统、问题现象和复现步骤，我们会尽快处理。',
-    'footer.issues': '反馈问题',
-    'footer.releases': '版本历史'
+    'nav.features':'功能','nav.preview':'预览','nav.tutorial':'使用教程','nav.download':'下载','nav.faq':'常见问题',
+    'hero.badge':'v1.0.0-beta 公测中',
+    'hero.title':'让 <span>OpenClaw</span> 配置<br>变得简单',
+    'hero.desc':'可视化桌面配置工具，告别手动编辑 YAML。支持 18+ 大模型提供商，一键配置、备份、迁移，全平台可用。',
+    'hero.downloadBtn':'免费下载','hero.learnMore':'了解更多',
+    'stats.models':'支持大模型','stats.channels':'通信频道','stats.platforms':'操作系统','stats.free':'免费使用',
+    'features.title':'核心功能','features.subtitle':'从安装到运维，一站式管理你的 OpenClaw 实例',
+    'f.visual':'可视化模型配置','f.visualDesc':'支持 18+ 主流大模型提供商，填入 API Key 即可使用。自动获取模型列表，智能推荐最佳模型。',
+    'f.channel':'多频道通信管理','f.channelDesc':'飞书、企微、QQ、钉钉、Telegram、Discord、Slack、WhatsApp 一键开关配置。',
+    'f.service':'服务启停与日志','f.serviceDesc':'一键启动、停止 OpenClaw 服务。实时查看运行日志，状态自动监控刷新。',
+    'f.backup':'备份与迁移','f.backupDesc':'一键备份配置、记忆、历史数据。支持定时备份，跨设备迁移轻松搞定。',
+    'f.diag':'故障诊断','f.diagDesc':'自动检测配置文件、端口占用、模型连通性。快速定位问题，不用再翻日志。',
+    'f.cross':'全平台 + 自动更新','f.crossDesc':'Windows、macOS（Intel + Apple Silicon）、Linux 全平台覆盖。内置自动更新，始终保持最新版。',
+    'preview.title':'界面预览','preview.subtitle':'直观的操作界面，上手即用',
+    'mock.models':'模型配置','mock.channels':'频道管理','mock.service':'服务管理','mock.backup':'备份迁移','mock.settings':'系统设置',
+    'mock.provider':'模型提供商','mock.model':'模型选择','mock.stream':'流式输出','mock.memory':'对话记忆','mock.log':'日志记录',
+    'models.title':'支持的大模型','models.subtitle':'覆盖国内外主流大模型提供商',
+    'tut.title':'快速上手','tut.subtitle':'四步完成配置，简单到不需要文档',
+    'tut.s1':'下载安装','tut.s1d':'下载对应系统的安装包，双击安装即可。',
+    'tut.s2':'选择模型','tut.s2d':'选择大模型提供商，填入你的 API Key。',
+    'tut.s3':'配置频道','tut.s3d':'开启需要的通信频道，填入 Token 即可接入。',
+    'tut.s4':'启动服务','tut.s4d':'点击启动按钮，你的 AI 机器人就上线了。',
+    'dl.title':'免费下载','dl.subtitle':'选择你的操作系统，一键安装即可使用',
+    'dl.installer':'安装版 (.exe)','dl.portable':'便携版 (.exe) 免安装','dl.universal':'通用版',
+    'dl.tip':'所有安装包均从 CDN 高速下载，国内外用户均可流畅访问。',
+    'dl.tip2':'macOS 首次打开如提示"无法验证开发者"，请右键点击应用 → 选择"打开"即可。',
+    'faq.title':'常见问题',
+    'faq.q1':'OpenClaw Companion 是什么？',
+    'faq.a1':'OpenClaw Companion 是 OpenClaw AI 机器人框架的桌面配置管理工具。它让你不用手动编辑 YAML 文件就能完成所有配置，包括模型选择、频道绑定、备份迁移等操作。',
+    'faq.q2':'需要先安装 OpenClaw 吗？',
+    'faq.a2':'不需要。Companion 内置了 OpenClaw 安装检测功能，首次启动会引导你安装。你只需要确保系统已安装 Node.js 22+。',
+    'faq.q3':'支持哪些操作系统？',
+    'faq.a3':'支持 Windows 10/11 (64-bit)、macOS (Intel 和 Apple Silicon)、Linux (Ubuntu、Debian、Fedora、Arch 等主流发行版)。',
+    'faq.q4':'配置数据存在哪里？安全吗？',
+    'faq.a4':'所有数据（模型配置、频道设置、对话记忆等）存储在你本地电脑的 ~/.openclaw/ 目录中，不会上传到任何服务器。你可以随时通过备份功能导出。',
+    'faq.q5':'macOS 提示"无法验证开发者"怎么办？',
+    'faq.a5':'右键点击应用 → 选择"打开" → 在弹窗中点击"打开"即可。这是因为应用未经 Apple 公证签名，不影响正常使用。',
+    'faq.q6':'完全免费吗？',
+    'faq.a6':'是的，OpenClaw Companion 完全免费，没有任何付费功能或内购。你需要自备大模型的 API Key（部分模型有免费额度）。',
+    'faq.q7':'如何获取更新？',
+    'faq.a7':'应用内置自动更新功能，有新版本时会弹窗提醒。你也可以在侧边栏手动点击"检查更新"。',
+    'ct.title':'联系我们','ct.subtitle':'遇到问题或有建议？随时联系',
+    'ct.email':'邮件反馈','ct.community':'社区交流','ct.communityDesc':'QQ 群 / 微信群<br>(即将开放)',
+    'ct.faq':'帮助文档','ct.faqDesc':'查看上方 FAQ 或<br>发邮件咨询',
+    'ft.desc':'AI 机器人配置，从未如此简单','ft.rights':'保留所有权利。'
   },
   en: {
-    'nav.features': 'Features',
-    'nav.download': 'Download',
-    'nav.faq': 'FAQ',
-    'hero.badge': 'v1.0.0-beta Public Beta',
-    'hero.title': 'Make <span>OpenClaw</span><br>Configuration Easy',
-    'hero.desc': 'Visual desktop configuration tool. No more manual YAML editing. Supports 18+ LLM providers, one-click setup, backup, and migration. Available on all platforms.',
-    'hero.downloadBtn': 'Download Now',
-    'stats.models': 'Supported Models',
-    'stats.channels': 'Channels',
-    'stats.platforms': 'Platforms',
-    'features.title': 'Key Features',
-    'features.subtitle': 'One-stop management for your OpenClaw instance',
-    'features.visualConfig': 'Visual Model Configuration',
-    'features.visualConfigDesc': 'Supports 18+ mainstream LLM providers. Just enter your API key and go. Auto-fetches model lists with smart recommendations.',
-    'features.channels': 'Multi-Channel Management',
-    'features.channelsDesc': 'Lark, WeCom, QQ, DingTalk, Telegram, Discord, Slack, WhatsApp - all configurable with one-click toggles.',
-    'features.service': 'Service Control',
-    'features.serviceDesc': 'Start and stop OpenClaw with one click. View real-time logs with auto-refresh status monitoring.',
-    'features.backup': 'Backup & Migration',
-    'features.backupDesc': 'One-click backup of configs, memories, and history. Automatic scheduled backups (daily/weekly/monthly) with migration guides.',
-    'features.diagnosis': 'Troubleshooting',
-    'features.diagnosisDesc': 'Auto-diagnose config files, port conflicts, and model connectivity. Quickly locate issues without digging through logs.',
-    'features.crossPlatform': 'Cross-Platform',
-    'features.crossPlatformDesc': 'Windows, macOS (Intel + Apple Silicon), Linux. Auto-update detection keeps you on the latest version.',
-    'models.title': 'Supported Models',
-    'models.subtitle': 'Covering mainstream LLM providers worldwide',
-    'download.title': 'Download',
-    'download.subtitle': 'Choose your OS and install with one click',
-    'download.installer': 'Installer (.exe)',
-    'download.portable': 'Portable (.exe) No Install',
-    'download.mirror': 'Mirror Download',
-    'download.universal': 'Universal',
-    'download.ubuntu': 'Package (Ubuntu/Debian)',
-    'download.mirrorNote': 'Slow GitHub downloads? Try our mirror. Files provided by openclaw.n8ndx.com.',
-    'faq.title': 'FAQ',
-    'faq.q1': 'What is OpenClaw Companion?',
-    'faq.a1': 'OpenClaw Companion is a desktop configuration tool for the OpenClaw AI bot framework. It lets you complete all configurations without manually editing YAML files, including model selection, channel binding, backup and migration.',
-    'faq.q2': 'Do I need to install OpenClaw first?',
-    'faq.a2': 'No. Companion has built-in OpenClaw installation detection and will guide you through installation on first launch. You only need Node.js 22+ installed.',
-    'faq.q3': 'Which operating systems are supported?',
-    'faq.a3': 'Windows 10/11 (64-bit), macOS (Intel and Apple Silicon), Linux (Ubuntu, Debian, Fedora, Arch, and other mainstream distributions).',
-    'faq.q4': 'Where is configuration data stored?',
-    'faq.a4': 'All configuration data is stored in the ~/.openclaw/ directory in your user folder, including model configs, channel settings, and conversation memories. You can export anytime via the backup feature.',
-    'faq.q5': 'macOS says "Cannot verify developer"?',
-    'faq.a5': 'Right-click the app → Select "Open" → Click "Open" in the dialog. This is because the app is not notarized by Apple, but it\'s safe to use.',
-    'faq.q6': 'How do I report issues or suggestions?',
-    'faq.a6': 'Please submit on GitHub Issues with your OS, problem description, and reproduction steps. We\'ll address it as soon as possible.',
-    'footer.issues': 'Report Issues',
-    'footer.releases': 'Releases'
+    'nav.features':'Features','nav.preview':'Preview','nav.tutorial':'Tutorial','nav.download':'Download','nav.faq':'FAQ',
+    'hero.badge':'v1.0.0-beta Public Beta',
+    'hero.title':'Make <span>OpenClaw</span><br>Configuration Easy',
+    'hero.desc':'Visual desktop configuration tool. No more manual YAML editing. Supports 18+ LLM providers, one-click setup, backup and migration across all platforms.',
+    'hero.downloadBtn':'Free Download','hero.learnMore':'Learn More',
+    'stats.models':'LLM Models','stats.channels':'Channels','stats.platforms':'Platforms','stats.free':'Free',
+    'features.title':'Key Features','features.subtitle':'One-stop management for your OpenClaw instance',
+    'f.visual':'Visual Model Config','f.visualDesc':'Supports 18+ mainstream LLM providers. Just enter your API Key. Auto-fetches model lists with smart recommendations.',
+    'f.channel':'Multi-Channel Management','f.channelDesc':'Lark, WeCom, QQ, DingTalk, Telegram, Discord, Slack, WhatsApp - all configurable with one-click toggles.',
+    'f.service':'Service Control & Logs','f.serviceDesc':'Start and stop OpenClaw with one click. View real-time logs with auto-refresh status monitoring.',
+    'f.backup':'Backup & Migration','f.backupDesc':'One-click backup of configs, memories and history. Scheduled backup support with easy cross-device migration.',
+    'f.diag':'Troubleshooting','f.diagDesc':'Auto-detect config issues, port conflicts and model connectivity. Quickly locate problems without digging through logs.',
+    'f.cross':'Cross-Platform + Auto-Update','f.crossDesc':'Windows, macOS (Intel + Apple Silicon), Linux. Built-in auto-update to always keep the latest version.',
+    'preview.title':'App Preview','preview.subtitle':'Intuitive interface, ready to use',
+    'mock.models':'Model Config','mock.channels':'Channels','mock.service':'Service','mock.backup':'Backup','mock.settings':'Settings',
+    'mock.provider':'Provider','mock.model':'Model','mock.stream':'Streaming','mock.memory':'Memory','mock.log':'Logging',
+    'models.title':'Supported Models','models.subtitle':'Covering mainstream LLM providers worldwide',
+    'tut.title':'Quick Start','tut.subtitle':'Four steps to get running — no docs needed',
+    'tut.s1':'Download & Install','tut.s1d':'Download the installer for your OS, double-click to install.',
+    'tut.s2':'Choose Model','tut.s2d':'Select your LLM provider and enter your API Key.',
+    'tut.s3':'Configure Channels','tut.s3d':'Enable the messaging channels you need and enter the tokens.',
+    'tut.s4':'Launch Service','tut.s4d':'Hit the start button and your AI bot goes live.',
+    'dl.title':'Free Download','dl.subtitle':'Choose your OS and install with one click',
+    'dl.installer':'Installer (.exe)','dl.portable':'Portable (.exe)','dl.universal':'Universal',
+    'dl.tip':'All downloads are served via global CDN for fast access worldwide.',
+    'dl.tip2':'macOS: If you see "Cannot verify developer", right-click the app → select "Open" to proceed.',
+    'faq.title':'FAQ',
+    'faq.q1':'What is OpenClaw Companion?',
+    'faq.a1':'OpenClaw Companion is a desktop configuration tool for the OpenClaw AI bot framework. It lets you manage all configurations visually without editing YAML files — model selection, channel binding, backup and migration.',
+    'faq.q2':'Do I need OpenClaw installed first?',
+    'faq.a2':'No. Companion detects and guides OpenClaw installation on first launch. You only need Node.js 22+ installed on your system.',
+    'faq.q3':'Which operating systems are supported?',
+    'faq.a3':'Windows 10/11 (64-bit), macOS (Intel and Apple Silicon), Linux (Ubuntu, Debian, Fedora, Arch and other mainstream distros).',
+    'faq.q4':'Where is my data stored? Is it safe?',
+    'faq.a4':'All data (model configs, channel settings, conversation memories) is stored locally in ~/.openclaw/ on your computer. Nothing is uploaded to any server. You can export anytime via the backup feature.',
+    'faq.q5':'macOS says "Cannot verify developer"?',
+    'faq.a5':'Right-click the app → Select "Open" → Click "Open" in the dialog. This is because the app is not notarized by Apple, but it\'s perfectly safe to use.',
+    'faq.q6':'Is it completely free?',
+    'faq.a6':'Yes, OpenClaw Companion is 100% free with no paid features or in-app purchases. You do need your own LLM API keys (some providers offer free tiers).',
+    'faq.q7':'How do I get updates?',
+    'faq.a7':'The app has built-in auto-update. You\'ll get a notification when a new version is available. You can also manually check for updates in the sidebar.',
+    'ct.title':'Contact Us','ct.subtitle':'Questions or suggestions? Get in touch',
+    'ct.email':'Email','ct.community':'Community','ct.communityDesc':'QQ Group / WeChat<br>(Coming soon)',
+    'ct.faq':'Help','ct.faqDesc':'Check FAQ above or<br>send us an email',
+    'ft.desc':'AI bot configuration, made simple','ft.rights':'All rights reserved.'
   },
   es: {
-    'nav.features': 'Funciones',
-    'nav.download': 'Descargar',
-    'nav.faq': 'FAQ',
-    'hero.badge': 'v1.0.0-beta Beta Publica',
-    'hero.title': 'Configuracion <span>OpenClaw</span><br>Facil',
-    'hero.desc': 'Herramienta de configuracion visual. No mas edicion manual de YAML. Soporta 18+ proveedores de LLM, configuracion con un clic, backup y migracion. Disponible en todas las plataformas.',
-    'hero.downloadBtn': 'Descargar Ahora',
-    'stats.models': 'Modelos Soportados',
-    'stats.channels': 'Canales',
-    'stats.platforms': 'Plataformas',
-    'features.title': 'Funciones Principales',
-    'features.subtitle': 'Gestion integral de tu instancia OpenClaw',
-    'features.visualConfig': 'Configuracion Visual de Modelos',
-    'features.visualConfigDesc': 'Soporta 18+ proveedores de LLM principales. Solo ingresa tu API key. Obtiene listas de modelos automaticamente con recomendaciones inteligentes.',
-    'features.channels': 'Gestion Multi-Canal',
-    'features.channelsDesc': 'Lark, WeCom, QQ, DingTalk, Telegram, Discord, Slack, WhatsApp - todos configurables con interruptores de un clic.',
-    'features.service': 'Control de Servicio',
-    'features.serviceDesc': 'Inicia y detiene OpenClaw con un clic. Ver logs en tiempo real con monitoreo de estado auto-actualizable.',
-    'features.backup': 'Backup y Migracion',
-    'features.backupDesc': 'Backup con un clic de configs, memorias e historial. Backups automaticos programados (diario/semanal/mensual) con guias de migracion.',
-    'features.diagnosis': 'Diagnostico',
-    'features.diagnosisDesc': 'Auto-diagnostica archivos de config, conflictos de puertos y conectividad de modelos. Localiza problemas rapidamente sin revisar logs.',
-    'features.crossPlatform': 'Multiplataforma',
-    'features.crossPlatformDesc': 'Windows, macOS (Intel + Apple Silicon), Linux. Deteccion de actualizaciones automatica para mantenerte en la ultima version.',
-    'models.title': 'Modelos Soportados',
-    'models.subtitle': 'Cobertura de proveedores de LLM principales mundialmente',
-    'download.title': 'Descargar',
-    'download.subtitle': 'Elige tu SO e instala con un clic',
-    'download.installer': 'Instalador (.exe)',
-    'download.portable': 'Portable (.exe) Sin Instalar',
-    'download.mirror': 'Descarga Espejo',
-    'download.universal': 'Universal',
-    'download.ubuntu': 'Paquete (Ubuntu/Debian)',
-    'download.mirrorNote': 'Descargas lentas de GitHub? Prueba nuestro espejo. Archivos proporcionados por openclaw.n8ndx.com.',
-    'faq.title': 'Preguntas Frecuentes',
-    'faq.q1': 'Que es OpenClaw Companion?',
-    'faq.a1': 'OpenClaw Companion es una herramienta de configuracion de escritorio para el framework de bots AI OpenClaw. Te permite completar todas las configuraciones sin editar manualmente archivos YAML, incluyendo seleccion de modelos, vinculacion de canales, backup y migracion.',
-    'faq.q2': 'Necesito instalar OpenClaw primero?',
-    'faq.a2': 'No. Companion tiene deteccion de instalacion de OpenClaw integrada y te guiara durante la instalacion en el primer inicio. Solo necesitas Node.js 22+ instalado.',
-    'faq.q3': 'Que sistemas operativos son soportados?',
-    'faq.a3': 'Windows 10/11 (64-bit), macOS (Intel y Apple Silicon), Linux (Ubuntu, Debian, Fedora, Arch y otras distribuciones principales).',
-    'faq.q4': 'Donde se almacenan los datos de configuracion?',
-    'faq.a4': 'Todos los datos de configuracion se almacenan en el directorio ~/.openclaw/ en tu carpeta de usuario, incluyendo configs de modelos, ajustes de canales y memorias de conversacion. Puedes exportar en cualquier momento via la funcion de backup.',
-    'faq.q5': 'macOS dice "No se puede verificar el desarrollador"?',
-    'faq.a5': 'Clic derecho en la app → Seleccionar "Abrir" → Clic en "Abrir" en el dialogo. Esto es porque la app no esta notarizada por Apple, pero es segura de usar.',
-    'faq.q6': 'Como reporto problemas o sugerencias?',
-    'faq.a6': 'Por favor envia en GitHub Issues con tu SO, descripcion del problema y pasos de reproduccion. Lo atenderemos lo antes posible.',
-    'footer.issues': 'Reportar Problemas',
-    'footer.releases': 'Versiones'
+    'nav.features':'Funciones','nav.preview':'Vista previa','nav.tutorial':'Tutorial','nav.download':'Descargar','nav.faq':'FAQ',
+    'hero.badge':'v1.0.0-beta Beta Publica',
+    'hero.title':'Configura <span>OpenClaw</span><br>Facilmente',
+    'hero.desc':'Herramienta de configuracion visual de escritorio. Sin mas edicion manual de YAML. Soporta 18+ proveedores LLM, configuracion, backup y migracion con un clic.',
+    'hero.downloadBtn':'Descarga Gratis','hero.learnMore':'Saber Mas',
+    'stats.models':'Modelos LLM','stats.channels':'Canales','stats.platforms':'Plataformas','stats.free':'Gratis',
+    'features.title':'Funciones Principales','features.subtitle':'Gestion integral de tu instancia OpenClaw',
+    'f.visual':'Config Visual de Modelos','f.visualDesc':'Soporta 18+ proveedores LLM principales. Solo ingresa tu API Key. Obtiene listas de modelos automaticamente.',
+    'f.channel':'Gestion Multi-Canal','f.channelDesc':'Lark, WeCom, QQ, DingTalk, Telegram, Discord, Slack, WhatsApp - todos configurables con un clic.',
+    'f.service':'Control de Servicio y Logs','f.serviceDesc':'Inicia y detiene OpenClaw con un clic. Ver logs en tiempo real con monitoreo auto-actualizable.',
+    'f.backup':'Backup y Migracion','f.backupDesc':'Backup con un clic de configs, memorias e historial. Soporte de backup programado con migracion facil.',
+    'f.diag':'Diagnostico','f.diagDesc':'Auto-detecta problemas de config, conflictos de puertos y conectividad de modelos. Localiza problemas rapidamente.',
+    'f.cross':'Multiplataforma + Auto-Update','f.crossDesc':'Windows, macOS (Intel + Apple Silicon), Linux. Auto-actualizacion integrada para siempre tener la ultima version.',
+    'preview.title':'Vista Previa','preview.subtitle':'Interfaz intuitiva, lista para usar',
+    'mock.models':'Config Modelos','mock.channels':'Canales','mock.service':'Servicio','mock.backup':'Backup','mock.settings':'Ajustes',
+    'mock.provider':'Proveedor','mock.model':'Modelo','mock.stream':'Streaming','mock.memory':'Memoria','mock.log':'Registro',
+    'models.title':'Modelos Soportados','models.subtitle':'Cobertura de proveedores LLM principales mundialmente',
+    'tut.title':'Inicio Rapido','tut.subtitle':'Cuatro pasos para configurar - sin documentacion necesaria',
+    'tut.s1':'Descargar e Instalar','tut.s1d':'Descarga el instalador para tu SO y haz doble clic.',
+    'tut.s2':'Elegir Modelo','tut.s2d':'Selecciona tu proveedor LLM e ingresa tu API Key.',
+    'tut.s3':'Configurar Canales','tut.s3d':'Activa los canales de mensajeria e ingresa los tokens.',
+    'tut.s4':'Iniciar Servicio','tut.s4d':'Presiona el boton de inicio y tu bot AI estara en linea.',
+    'dl.title':'Descarga Gratis','dl.subtitle':'Elige tu SO e instala con un clic',
+    'dl.installer':'Instalador (.exe)','dl.portable':'Portable (.exe)','dl.universal':'Universal',
+    'dl.tip':'Todas las descargas se sirven via CDN global para acceso rapido mundial.',
+    'dl.tip2':'macOS: Si ves "No se puede verificar el desarrollador", clic derecho en la app y selecciona "Abrir".',
+    'faq.title':'Preguntas Frecuentes',
+    'faq.q1':'Que es OpenClaw Companion?',
+    'faq.a1':'OpenClaw Companion es una herramienta de configuracion de escritorio para el framework de bots AI OpenClaw. Te permite gestionar todas las configuraciones visualmente sin editar archivos YAML.',
+    'faq.q2':'Necesito instalar OpenClaw primero?',
+    'faq.a2':'No. Companion detecta y guia la instalacion de OpenClaw en el primer inicio. Solo necesitas Node.js 22+ instalado.',
+    'faq.q3':'Que sistemas operativos son soportados?',
+    'faq.a3':'Windows 10/11 (64-bit), macOS (Intel y Apple Silicon), Linux (Ubuntu, Debian, Fedora, Arch y otras distribuciones principales).',
+    'faq.q4':'Donde se almacenan mis datos? Es seguro?',
+    'faq.a4':'Todos los datos se almacenan localmente en ~/.openclaw/ en tu computadora. Nada se sube a ningun servidor. Puedes exportar en cualquier momento via backup.',
+    'faq.q5':'macOS dice "No se puede verificar el desarrollador"?',
+    'faq.a5':'Clic derecho en la app, seleccionar "Abrir" y clic en "Abrir" en el dialogo. Es porque la app no esta notarizada por Apple, pero es segura.',
+    'faq.q6':'Es completamente gratis?',
+    'faq.a6':'Si, OpenClaw Companion es 100% gratis sin funciones de pago. Necesitas tus propias API keys de LLM (algunos proveedores ofrecen niveles gratuitos).',
+    'faq.q7':'Como obtengo actualizaciones?',
+    'faq.a7':'La app tiene auto-actualizacion integrada. Recibiras una notificacion cuando haya nueva version. Tambien puedes verificar manualmente en la barra lateral.',
+    'ct.title':'Contacto','ct.subtitle':'Preguntas o sugerencias? Contactanos',
+    'ct.email':'Email','ct.community':'Comunidad','ct.communityDesc':'Grupo QQ / WeChat<br>(Proximamente)',
+    'ct.faq':'Ayuda','ct.faqDesc':'Revisa el FAQ arriba o<br>envianos un email',
+    'ft.desc':'Configuracion de bots AI, simplificada','ft.rights':'Todos los derechos reservados.'
   }
 };
 
-// State
-let currentLang = localStorage.getItem('lang') || 'zh';
-let currentTheme = localStorage.getItem('theme') || 'dark';
+// ===== State =====
+var lang = localStorage.getItem('oc-lang') || 'zh';
+var theme = localStorage.getItem('oc-theme') || 'dark';
 
-// Apply translations
-function applyTranslations() {
-  const texts = i18n[currentLang];
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    if (texts[key]) {
-      if (key === 'hero.title') {
-        el.innerHTML = texts[key];
+// ===== Apply i18n =====
+function applyLang(){
+  var t = i18n[lang];
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    var k = el.getAttribute('data-i18n');
+    if(t[k]){
+      if(k === 'hero.title' || k === 'ct.communityDesc' || k === 'ct.faqDesc'){
+        el.innerHTML = t[k];
       } else {
-        el.textContent = texts[key];
+        el.textContent = t[k];
       }
     }
   });
-
-  // Update language button
-  const langNames = { zh: '中文', en: 'English', es: 'Español' };
-  document.getElementById('currentLang').textContent = langNames[currentLang];
-
-  // Update active state in menu
-  document.querySelectorAll('.lang-option').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.lang === currentLang);
-  });
-
-  // Update html lang
-  document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : currentLang;
+  var names = {zh:'中文',en:'English',es:'Español'};
+  document.getElementById('currentLang').textContent = names[lang];
+  document.querySelectorAll('.lang-option').forEach(function(b){ b.classList.toggle('active', b.dataset.lang === lang); });
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang;
 }
 
-// Apply theme
-function applyTheme() {
-  document.documentElement.setAttribute('data-theme', currentTheme);
-  document.getElementById('moonIcon').style.display = currentTheme === 'dark' ? 'block' : 'none';
-  document.getElementById('sunIcon').style.display = currentTheme === 'light' ? 'block' : 'none';
+// ===== Apply Theme =====
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('moonIcon').style.display = theme === 'dark' ? 'block' : 'none';
+  document.getElementById('sunIcon').style.display = theme === 'light' ? 'block' : 'none';
 }
 
-// Event listeners
-document.getElementById('themeToggle').addEventListener('click', () => {
-  currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-  localStorage.setItem('theme', currentTheme);
+// ===== Events =====
+document.getElementById('themeToggle').addEventListener('click', function(){
+  theme = theme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('oc-theme', theme);
   applyTheme();
 });
 
-document.getElementById('langToggle').addEventListener('click', (e) => {
+document.getElementById('langToggle').addEventListener('click', function(e){
   e.stopPropagation();
   document.getElementById('langMenu').classList.toggle('active');
 });
 
-document.querySelectorAll('.lang-option').forEach(btn => {
-  btn.addEventListener('click', () => {
-    currentLang = btn.dataset.lang;
-    localStorage.setItem('lang', currentLang);
-    applyTranslations();
+document.querySelectorAll('.lang-option').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    lang = btn.dataset.lang;
+    localStorage.setItem('oc-lang', lang);
+    applyLang();
     document.getElementById('langMenu').classList.remove('active');
   });
 });
 
-document.addEventListener('click', () => {
+document.addEventListener('click', function(){
   document.getElementById('langMenu').classList.remove('active');
 });
 
-// Initialize
+// ===== FAQ Accordion =====
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click', function(){
+    var item = q.parentElement;
+    var wasOpen = item.classList.contains('open');
+    // close all
+    document.querySelectorAll('.faq-item').forEach(function(fi){ fi.classList.remove('open'); });
+    if(!wasOpen) item.classList.add('open');
+  });
+});
+
+// ===== Scroll Animations =====
+var observer = new IntersectionObserver(function(entries){
+  entries.forEach(function(entry){
+    if(entry.isIntersecting){
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-up').forEach(function(el){
+  observer.observe(el);
+});
+
+// ===== Init =====
 applyTheme();
-applyTranslations();
+applyLang();
 </script>
 
 </body>

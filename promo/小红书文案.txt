@@ -1,0 +1,139 @@
+====================================================
+  OpenClaw Companion 小红书推广文案
+  配图位于 promo/ 目录
+====================================================
+
+
+【文案一：主推版（推荐首发）】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+标题：
+搞AI机器人配置搞到崩溃？这个工具一键搞定！
+
+正文：
+之前帮朋友搭 AI 机器人，光配置文件就改了一下午，YAML 格式错一个空格整个服务就挂了...
+
+后来自己做了这个工具 OpenClaw Companion，专门解决配置痛点：
+
+1. 可视化配置，告别手写 YAML
+支持 18+ 主流大模型（DeepSeek、通义千问、Kimi、GPT、Claude...），填个 API Key 就能用，其他参数全部自动填充
+
+2. 8大通信频道一键管理
+飞书/企微/QQ/钉钉/Telegram/Discord/Slack/WhatsApp，开关式配置
+
+3. 一键备份迁移
+怕数据丢？自动定时备份，换电脑也能无缝迁移
+
+4. 服务启停 + 实时日志
+不用开终端了，在界面上直接启动/停止，日志实时查看
+
+5. 故障自动诊断
+配置有问题？一键体检，自动帮你找到问题在哪
+
+Windows / macOS / Linux 全平台支持，免费开源
+
+下载地址：openclaw.n8ndx.com
+
+配图：01-封面.png, 02-功能介绍.png, 03-模型支持.png, 04-下载安装.png
+
+标签：
+#AI工具 #AI机器人 #开发工具 #效率工具 #OpenClaw #大模型 #DeepSeek #ChatGPT #开源项目 #程序员必备
+
+
+【文案二：痛点切入版】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+标题：
+配置AI机器人不用再手写YAML了！可视化神器分享
+
+正文：
+做过 AI 机器人的应该都懂，配置文件写到怀疑人生...
+
+API Key 填错位置、缩进不对、频道配置漏了参数、换个模型又要改一堆东西
+
+所以做了 OpenClaw Companion 这个桌面工具，把配置这件事变成「点点选选」就能完成：
+
+- 18+ 大模型提供商全覆盖
+  国内：DeepSeek / 通义千问 / Kimi / 智谱 / 豆包 / 讯飞...
+  国际：OpenAI / Claude / Gemini / Grok / Mistral
+
+- 填 API Key 就行，其他全自动
+  Base URL、模型名、参数全部预填好，不用查文档
+
+- 配置完直接启动
+  不用回终端敲命令，界面上一键启动，日志实时看
+
+- 数据安全
+  自动备份 + 一键迁移，换电脑不慌
+
+三个平台都能用（Win/Mac/Linux），免费开源 MIT 协议
+
+官网下载：openclaw.n8ndx.com
+GitHub：github.com/zhan69820/OpenClaw-Companion
+
+目前是 Beta 版本，如果你在用 OpenClaw，欢迎试用反馈！
+
+配图：01-封面.png, 03-模型支持.png, 02-功能介绍.png
+
+标签：
+#AI配置工具 #YAML配置 #AI机器人搭建 #效率工具分享 #开源软件 #大模型配置 #DeepSeek #程序员日常 #开发者工具 #技术分享
+
+
+【文案三：简洁种草版】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+标题：
+终于不用手写YAML配置AI机器人了
+
+正文：
+安利一个刚做的开源工具
+
+OpenClaw Companion
+一句话介绍：AI 机器人的可视化配置管家
+
+能干什么：
+- 选模型：18+ 大模型，填 Key 即用
+- 配频道：飞书/QQ/微信/TG/Discord 一键开关
+- 管服务：启动/停止/看日志，不用开终端
+- 做备份：自动定时备份，一键迁移
+- 查问题：配置有误自动诊断
+
+三个平台全支持
+免费 + 开源 + 自动更新
+
+下载：openclaw.n8ndx.com
+
+Beta 版欢迎试用提建议
+
+配图：01-封面.png, 02-功能介绍.png
+
+标签：
+#开源工具 #AI工具推荐 #效率神器 #开发者工具 #技术分享 #AI机器人 #大模型
+
+
+【文案四：面向海外用户（英文社媒通用）】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+标题：
+Stop editing YAML by hand - visual config tool for AI bots
+
+正文：
+Just released OpenClaw Companion - a desktop app that makes configuring AI bots actually painless.
+
+What it does:
+- Visual config for 18+ LLM providers (OpenAI, Claude, Gemini, DeepSeek, Mistral...)
+- Multi-channel management (Telegram, Discord, Slack, WhatsApp + more)
+- One-click start/stop with real-time logs
+- Auto backup & cross-device migration
+- Built-in diagnostics
+
+Works on Windows, macOS, and Linux.
+Free, open source (MIT).
+
+Download: openclaw.n8ndx.com
+GitHub: github.com/zhan69820/OpenClaw-Companion
+
+Currently in beta - feedback welcome!
+
+Tags:
+#AI #LLM #OpenSource #DevTools #AIBot #ChatGPT #DeepSeek #Claude #Developer

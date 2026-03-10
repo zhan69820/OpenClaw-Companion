@@ -63,8 +63,13 @@ const api = {
   // 检查更新
   updater: {
     check: () => ipcRenderer.invoke('updater:check'),
-    onProgress: (callback: (progress: { percent: number }) => void) => {
-      ipcRenderer.on('update:progress', (_event, progress) => callback(progress))
+    download: () => ipcRenderer.invoke('updater:download'),
+    install: () => ipcRenderer.invoke('updater:install'),
+    openRelease: () => ipcRenderer.invoke('updater:openRelease'),
+    on: (channel: string, callback: (payload: unknown) => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, payload: unknown) => callback(payload)
+      ipcRenderer.on(channel, handler)
+      return () => ipcRenderer.removeListener(channel, handler)
     }
   }
 }

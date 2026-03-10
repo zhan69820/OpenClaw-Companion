@@ -7,7 +7,7 @@ import { homedir, tmpdir } from 'os'
 import { ConfigManager } from './config'
 import { testLLMConnection, fetchModels } from './llm-test'
 import { checkPort } from './doctor'
-import { checkForUpdates } from './updater'
+import { checkForUpdates, downloadUpdate, quitAndInstall, openReleasePage } from './updater'
 
 const execAsync = promisify(exec)
 
@@ -733,6 +733,21 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
   // ── 检查更新 ──
   ipcMain.handle('updater:check', async () => {
     checkForUpdates()
+    return { ok: true }
+  })
+
+  ipcMain.handle('updater:download', async () => {
+    downloadUpdate()
+    return { ok: true }
+  })
+
+  ipcMain.handle('updater:install', async () => {
+    quitAndInstall()
+    return { ok: true }
+  })
+
+  ipcMain.handle('updater:openRelease', async () => {
+    openReleasePage()
     return { ok: true }
   })
 

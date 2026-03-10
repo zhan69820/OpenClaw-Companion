@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useConfigStore } from '@/stores/config'
 import { useI18n } from '@/composables/useI18n'
+import UpdateModal from '@/components/UpdateModal.vue'
 import {
   Brain,
   Radio,
@@ -98,6 +99,7 @@ onMounted(() => {
 
 <template>
   <div class="h-screen w-screen flex flex-col overflow-hidden select-none">
+    <UpdateModal />
     <!-- 自定义标题栏 -->
     <header
       class="drag-region flex items-center justify-between h-10 px-4 border-b border-border/50 bg-background/80 backdrop-blur-md shrink-0 z-50"
