@@ -111,16 +111,18 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
     
     try {
       if (platform === 'win32') {
-        // Windows: 使用 npm 直接安装
-        const { stderr } = await execAsync('npm install -g openclaw', { timeout: 120000 })
+        // Windows: 使用 PowerShell 脚本安装
+        const installCmd = 'powershell -ExecutionPolicy Bypass -Command "iwr https://openclaw.ai/install.ps1 -useb | iex"'
+        const { stderr } = await execAsync(installCmd, { timeout: 600000 })
         if (stderr && !stderr.includes('WARN')) {
           return { success: false, message: stderr }
         }
         return { success: true, message: 'OpenClaw 安装成功' }
       } else {
-        // macOS/Linux: 使用官方安装脚本（会自动处理 Node.js）
-        const installCmd = 'curl -fsSL https://openclaw.ai/install.sh | bash'
-        const { stderr } = await execAsync(installCmd, { timeout: 300000 }) // 5分钟超时
+        // macOS/Linux: 使用 CLI 安装脚本（无需 root 权限）
+        // 该脚本会自动下载 Node.js 运行时到 ~/.openclaw/tools，不需要系统 Node.js
+        const installCmd = 'curl -fsSL https://openclaw.ai/install-cli.sh | bash'
+        const { stderr } = await execAsync(installCmd, { timeout: 600000 })
         
         if (stderr && !stderr.includes('WARN')) {
           return { success: false, message: stderr }
@@ -129,15 +131,6 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
         return { success: true, message: 'OpenClaw 安装成功' }
       }
     } catch (error: any) {
-      // 如果安装失败，可能是 Windows 没有 Node.js
-      if (platform === 'win32' && error?.message?.includes('node')) {
-        await shell.openExternal('https://nodejs.org/en/download')
-        return { 
-          success: false, 
-          message: '未检测到 Node.js，已为您打开官方下载页面。\n请下载并安装 LTS 版本，然后重新点击安装。' 
-        }
-      }
-      
       return { 
         success: false, 
         message: error?.message || '安装失败，请尝试手动安装' 
