@@ -146,63 +146,46 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
     
     try {
       if (platform === 'win32') {
-        // Windows: 使用 PowerShell 脚本安装
-        const installCmd = 'powershell -ExecutionPolicy Bypass -Command "iwr https://openclaw.ai/install.ps1 -useb | iex"'
-        const { stderr } = await execAsync(installCmd, { timeout: 600000 })
-        if (stderr && !stderr.includes('WARN')) {
-          return { success: false, message: stderr }
-        }
-        return { success: true, message: 'OpenClaw 安装成功' }
+        // Windows: 用 PowerShell 窗口执行安装脚本
+        await execAsync(
+          'start powershell -NoExit -ExecutionPolicy Bypass -Command "iwr https://openclaw.ai/install.ps1 -useb | iex"',
+          { timeout: 10000 }
+        )
+        return { success: true, message: '正在打开 PowerShell 安装窗口，请等待安装完成后关闭窗口，然后点击"检测安装状态"' }
+      } else if (platform === 'darwin') {
+        // macOS: 用 osascript 打开 Terminal 执行安装脚本
+        // 这样脚本运行在用户自己的 shell 环境里，PATH 完整，权限正常
+        const script = `curl -fsSL https://openclaw.ai/install.sh | bash`
+        await execAsync(
+          `osascript -e 'tell application "Terminal" to do script "${script}"' -e 'tell application "Terminal" to activate'`,
+          { timeout: 10000 }
+        )
+        return { success: true, message: '正在打开终端安装 OpenClaw，请等待安装完成后关闭终端，然后点击"检测安装状态"' }
       } else {
-        // macOS/Linux: 先检测系统是否已有 Node.js
-        let hasNode = false
-        try {
-          const { stdout } = await execWithPath('node --version')
-          const ver = parseInt(stdout.trim().replace('v', '').split('.')[0])
-          hasNode = ver >= 22
-          if (!hasNode && ver > 0) {
-            console.log(`Node.js ${stdout.trim()} 版本过低，需要 v22+`)
-          }
-        } catch {
-          console.log('系统未安装 Node.js')
+        // Linux: 尝试常见终端模拟器
+        const script = `curl -fsSL https://openclaw.ai/install.sh | bash`
+        const terminals = [
+          `gnome-terminal -- bash -c '${script}; exec bash'`,
+          `xterm -e 'bash -c "${script}; exec bash"'`,
+          `konsole -e bash -c '${script}; exec bash'`,
+        ]
+        let opened = false
+        for (const cmd of terminals) {
+          try {
+            await execAsync(cmd, { timeout: 5000 })
+            opened = true
+            break
+          } catch {}
         }
-
-        if (hasNode) {
-          // 已有 Node.js >= 22，直接用 npm 安装 OpenClaw（用户目录，无需 sudo）
-          const home = homedir()
-          const npmGlobal = join(home, '.npm-global')
-          
-          // 确保 npm prefix 指向用户目录
-          await execWithPath(`npm config set prefix "${npmGlobal}"`, { timeout: 30000 }).catch(() => {})
-          
-          const { stderr } = await execWithPath('npm install -g openclaw', { timeout: 300000 })
-          if (stderr && !stderr.includes('WARN')) {
-            return { success: false, message: stderr }
-          }
-          return { success: true, message: 'OpenClaw 安装成功' }
-        } else {
-          // 没有 Node.js 或版本太低，使用官方 CLI 安装脚本（会自带 Node.js 运行时）
-          let installCmd = 'curl -fsSL https://openclaw.ai/install-cli.sh | bash'
-          
-          // Apple Silicon: 强制 arm64 执行，避免 Rosetta 架构问题
-          if (platform === 'darwin') {
-            try {
-              await execAsync('/usr/bin/arch -arm64 true')
-              installCmd = "/usr/bin/arch -arm64 bash -c 'curl -fsSL https://openclaw.ai/install-cli.sh | bash'"
-            } catch {}
-          }
-          
-          const { stderr } = await execAsync(installCmd, { timeout: 600000 })
-          if (stderr && !stderr.includes('WARN')) {
-            return { success: false, message: stderr }
-          }
-          return { success: true, message: 'OpenClaw 安装成功' }
+        if (!opened) {
+          return { success: false, message: '无法自动打开终端，请手动执行：\ncurl -fsSL https://openclaw.ai/install.sh | bash' }
         }
+        return { success: true, message: '正在打开终端安装 OpenClaw，请等待安装完成后关闭终端，然后点击"检测安装状态"' }
       }
     } catch (error: any) {
       return { 
         success: false, 
-        message: error?.message || '安装失败，请尝试手动安装' 
+        message: error?.message || '安装失败，请手动执行：\ncurl -fsSL https://openclaw.ai/install.sh | bash'
       }
     }
   })
