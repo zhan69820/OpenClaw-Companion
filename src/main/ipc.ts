@@ -106,70 +106,56 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
     }
   })
 
-  // 自动检测并安装 Node.js（如果需要）
-  async function checkAndInstallNodeJS(platform: NodeJS.Platform): Promise<{ success: boolean; message?: string }> {
+  // 检测 Node.js 是否已安装（使用 which/where 命令）
+  async function checkNodeJSInstalled(): Promise<{ installed: boolean; version?: string }> {
+    const platform = process.platform
+    const checkCmd = platform === 'win32' ? 'where node' : 'which node'
+    
     try {
-      // 先检查是否已安装
-      await execAsync('node --version')
-      return { success: true }
+      await execAsync(checkCmd)
+      // 如果能找到 node 命令，再获取版本
+      const { stdout } = await execAsync('node --version')
+      return { installed: true, version: stdout.trim() }
     } catch {
-      // 未安装，开始自动安装
-      console.log('Node.js 未检测到，开始自动安装...')
+      return { installed: false }
+    }
+  }
+
+  // 使用 nvm 安装最新 LTS 版本的 Node.js（macOS/Linux）
+  async function installNodeViaNVM(): Promise<{ success: boolean; message?: string }> {
+    const home = homedir()
+    const nvmDir = join(home, '.nvm')
+    
+    try {
+      // 检查是否已安装 nvm
+      const hasNvm = existsSync(nvmDir)
       
-      if (platform === 'win32') {
-        // Windows: 使用 PowerShell 下载并安装
-        const psScript = `
-          $url = "https://nodejs.org/dist/v22.11.0/node-v22.11.0-x64.msi"
-          $output = "$env:TEMP\\nodejs-installer.msi"
-          Write-Host "正在下载 Node.js..."
-          Invoke-WebRequest -Uri $url -OutFile $output
-          Write-Host "正在安装 Node.js..."
-          Start-Process msiexec.exe -ArgumentList "/i $output /quiet /norestart" -Wait
-          Remove-Item $output -Force
-          Write-Host "Node.js 安装完成"
+      if (!hasNvm) {
+        // 安装 nvm
+        console.log('Installing nvm...')
+        const installScript = `
+          export NVM_DIR="${nvmDir}" &&
+          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
         `
-        
-        try {
-          await execAsync(`powershell -Command "& {${psScript}}"`, { timeout: 300000 }) // 5分钟超时
-          // 刷新环境变量
-          await execAsync('refreshenv', { timeout: 10000 }).catch(() => {})
-          return { success: true }
-        } catch (error: any) {
-          return { success: false, message: `Node.js 安装失败: ${error?.message || '未知错误'}` }
-        }
-      } else if (platform === 'darwin') {
-        // macOS: 使用 Homebrew 安装（如果已安装 brew）
-        try {
-          await execAsync('brew --version')
-          await execAsync('brew install node@22', { timeout: 300000 })
-          return { success: true }
-        } catch {
-          // 没有 Homebrew，提示用户手动安装
-          return { 
-            success: false, 
-            message: '请先安装 Homebrew，然后运行: brew install node@22\n或从 https://nodejs.org 下载安装' 
-          }
-        }
-      } else {
-        // Linux: 使用包管理器
-        try {
-          // 尝试 apt (Ubuntu/Debian)
-          await execAsync('apt --version', { timeout: 5000 })
-          await execAsync('sudo apt update && sudo apt install -y nodejs npm', { timeout: 300000 })
-          return { success: true }
-        } catch {
-          try {
-            // 尝试 yum (CentOS/RHEL/Fedora)
-            await execAsync('yum --version', { timeout: 5000 })
-            await execAsync('sudo yum install -y nodejs npm', { timeout: 300000 })
-            return { success: true }
-          } catch {
-            return { 
-              success: false, 
-              message: '请手动安装 Node.js 22+: https://nodejs.org' 
-            }
-          }
-        }
+        await execAsync(installScript, { timeout: 120000 })
+      }
+      
+      // 使用 nvm 安装最新 LTS 版本
+      console.log('Installing Node.js LTS via nvm...')
+      const nvmScript = `
+        export NVM_DIR="${nvmDir}" &&
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" &&
+        nvm install --lts &&
+        nvm use --lts &&
+        nvm alias default lts/*
+      `
+      await execAsync(nvmScript, { timeout: 300000 })
+      
+      return { success: true }
+    } catch (error: any) {
+      return { 
+        success: false, 
+        message: `Node.js 安装失败: ${error?.message || '未知错误'}\n请手动安装: https://nodejs.org` 
       }
     }
   }
@@ -178,13 +164,28 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
     const platform = process.platform
     
     try {
-      // 自动检测并安装 Node.js（如果需要）
-      const nodeResult = await checkAndInstallNodeJS(platform)
-      if (!nodeResult.success) {
-        return nodeResult
+      // 1. 检测 Node.js
+      const nodeCheck = await checkNodeJSInstalled()
+      
+      if (!nodeCheck.installed) {
+        // Node.js 未安装
+        if (platform === 'win32') {
+          // Windows: 打开官方下载页面，让用户手动安装
+          await shell.openExternal('https://nodejs.org/en/download')
+          return { 
+            success: false, 
+            message: '未检测到 Node.js，已为您打开官方下载页面。\n请下载并安装 LTS 版本（推荐 v22+），然后重新点击安装。' 
+          }
+        } else {
+          // macOS/Linux: 使用 nvm 自动安装
+          const installResult = await installNodeViaNVM()
+          if (!installResult.success) {
+            return installResult
+          }
+        }
       }
 
-      // 安装 OpenClaw
+      // 2. 安装 OpenClaw
       const cmd = platform === 'win32' 
         ? 'npm install -g openclaw'
         : 'sudo npm install -g openclaw'
