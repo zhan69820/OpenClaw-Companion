@@ -4,6 +4,8 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerIpcHandlers } from './ipc'
 import { initUpdater, checkForUpdates } from './updater'
 
+let ipcRegistered = false
+
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
     width: 1280,
@@ -33,12 +35,14 @@ function createWindow(): void {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 
-  registerIpcHandlers(mainWindow)
+  // IPC handlers 只注册一次，避免重复注册报错
+  if (!ipcRegistered) {
+    registerIpcHandlers(mainWindow)
+    ipcRegistered = true
+  }
 
-  // 初始化自动更新
   initUpdater(mainWindow)
 
-  // 应用启动后延迟检查更新（避免启动时卡顿）
   setTimeout(() => {
     checkForUpdates()
   }, 3000)
@@ -51,7 +55,14 @@ app.whenReady().then(() => {
   })
   createWindow()
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    // macOS: 点击 Dock 图标时，若窗口已存在则聚焦，否则重建
+    const windows = BrowserWindow.getAllWindows()
+    if (windows.length === 0) {
+      createWindow()
+    } else {
+      windows[0].show()
+      windows[0].focus()
+    }
   })
 })
 
