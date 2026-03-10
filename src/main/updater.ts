@@ -61,7 +61,7 @@ function showUpdateDialog(info: { version: string; releaseNotes?: string }): voi
     autoUpdater.downloadUpdate()
   } else if (result === 2) {
     // 查看更新日志
-    shell.openExternal('https://github.com/zhan69820/OpenClaw-Companion/releases')
+    shell.openExternal('https://openclaw.n8ndx.com')
   }
 }
 
