@@ -106,98 +106,38 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
     }
   })
 
-  // 检测 Node.js 是否已安装（使用 which/where 命令）
-  async function checkNodeJSInstalled(): Promise<{ installed: boolean; version?: string }> {
-    const platform = process.platform
-    const checkCmd = platform === 'win32' ? 'where node' : 'which node'
-    
-    try {
-      await execAsync(checkCmd)
-      // 如果能找到 node 命令，再获取版本
-      const { stdout } = await execAsync('node --version')
-      return { installed: true, version: stdout.trim() }
-    } catch {
-      return { installed: false }
-    }
-  }
-
-  // 使用 nvm 安装最新 LTS 版本的 Node.js（macOS/Linux）
-  async function installNodeViaNVM(): Promise<{ success: boolean; message?: string }> {
-    const home = homedir()
-    const nvmDir = join(home, '.nvm')
-    
-    try {
-      // 检查是否已安装 nvm
-      const hasNvm = existsSync(nvmDir)
-      
-      if (!hasNvm) {
-        // 安装 nvm
-        console.log('Installing nvm...')
-        const installScript = `
-          export NVM_DIR="${nvmDir}" &&
-          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-        `
-        await execAsync(installScript, { timeout: 120000 })
-      }
-      
-      // 使用 nvm 安装最新 LTS 版本
-      console.log('Installing Node.js LTS via nvm...')
-      const nvmScript = `
-        export NVM_DIR="${nvmDir}" &&
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" &&
-        nvm install --lts &&
-        nvm use --lts &&
-        nvm alias default lts/*
-      `
-      await execAsync(nvmScript, { timeout: 300000 })
-      
-      return { success: true }
-    } catch (error: any) {
-      return { 
-        success: false, 
-        message: `Node.js 安装失败: ${error?.message || '未知错误'}\n请手动安装: https://nodejs.org` 
-      }
-    }
-  }
-
   ipcMain.handle('openclaw:install', async () => {
     const platform = process.platform
     
     try {
-      // 1. 检测 Node.js
-      const nodeCheck = await checkNodeJSInstalled()
-      
-      if (!nodeCheck.installed) {
-        // Node.js 未安装
-        if (platform === 'win32') {
-          // Windows: 打开官方下载页面，让用户手动安装
-          await shell.openExternal('https://nodejs.org/en/download')
-          return { 
-            success: false, 
-            message: '未检测到 Node.js，已为您打开官方下载页面。\n请下载并安装 LTS 版本（推荐 v22+），然后重新点击安装。' 
-          }
-        } else {
-          // macOS/Linux: 使用 nvm 自动安装
-          const installResult = await installNodeViaNVM()
-          if (!installResult.success) {
-            return installResult
-          }
+      if (platform === 'win32') {
+        // Windows: 使用 npm 直接安装
+        const { stderr } = await execAsync('npm install -g openclaw', { timeout: 120000 })
+        if (stderr && !stderr.includes('WARN')) {
+          return { success: false, message: stderr }
+        }
+        return { success: true, message: 'OpenClaw 安装成功' }
+      } else {
+        // macOS/Linux: 使用官方安装脚本（会自动处理 Node.js）
+        const installCmd = 'curl -fsSL https://openclaw.ai/install.sh | bash'
+        const { stderr } = await execAsync(installCmd, { timeout: 300000 }) // 5分钟超时
+        
+        if (stderr && !stderr.includes('WARN')) {
+          return { success: false, message: stderr }
+        }
+        
+        return { success: true, message: 'OpenClaw 安装成功' }
+      }
+    } catch (error: any) {
+      // 如果安装失败，可能是 Windows 没有 Node.js
+      if (platform === 'win32' && error?.message?.includes('node')) {
+        await shell.openExternal('https://nodejs.org/en/download')
+        return { 
+          success: false, 
+          message: '未检测到 Node.js，已为您打开官方下载页面。\n请下载并安装 LTS 版本，然后重新点击安装。' 
         }
       }
-
-      // 2. 安装 OpenClaw
-      const cmd = platform === 'win32' 
-        ? 'npm install -g openclaw'
-        : 'sudo npm install -g openclaw'
       
-      const { stderr } = await execAsync(cmd, { timeout: 120000 })
-      
-      if (stderr && !stderr.includes('WARN')) {
-        return { success: false, message: stderr }
-      }
-      
-      return { success: true, message: 'OpenClaw 安装成功' }
-    } catch (error: any) {
       return { 
         success: false, 
         message: error?.message || '安装失败，请尝试手动安装' 
