@@ -120,8 +120,20 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
         return { success: true, message: 'OpenClaw 安装成功' }
       } else {
         // macOS/Linux: 使用 CLI 安装脚本（无需 root 权限）
-        // 该脚本会自动下载 Node.js 运行时到 ~/.openclaw/tools，不需要系统 Node.js
-        const installCmd = 'curl -fsSL https://openclaw.ai/install-cli.sh | bash'
+        let installCmd = 'curl -fsSL https://openclaw.ai/install-cli.sh | bash'
+        
+        if (platform === 'darwin') {
+          // macOS: 检测是否为 Apple Silicon，强制使用原生 arm64 架构执行
+          // 避免 Electron 以 Rosetta (x64) 运行时导致脚本下载错误架构的 Node.js
+          try {
+            await execAsync('/usr/bin/arch -arm64 true')
+            // 硬件支持 arm64，强制以 arm64 执行安装脚本
+            installCmd = '/usr/bin/arch -arm64 bash -c \'curl -fsSL https://openclaw.ai/install-cli.sh | bash\''
+          } catch {
+            // Intel Mac，直接执行
+          }
+        }
+        
         const { stderr } = await execAsync(installCmd, { timeout: 600000 })
         
         if (stderr && !stderr.includes('WARN')) {
@@ -135,6 +147,7 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
         success: false, 
         message: error?.message || '安装失败，请尝试手动安装' 
       }
+    }
     }
   })
 
