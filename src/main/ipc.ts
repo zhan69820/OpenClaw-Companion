@@ -90,21 +90,56 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
   // ── OpenClaw 检测与安装 ──
   ipcMain.handle('openclaw:check', async () => {
     try {
-      const { stdout } = await execAsync('openclaw --version')
+      const { stdout } = await execWithPath('openclaw --version')
       return { installed: true, version: stdout.trim() }
     } catch {
-      // 尝试检测全局 npm 包
       try {
-        const { stdout } = await execAsync('npm list -g openclaw')
+        const { stdout } = await execWithPath('npm list -g openclaw')
         if (stdout.includes('openclaw')) {
           return { installed: true, version: 'unknown' }
         }
-      } catch {
-        // 忽略
-      }
+      } catch {}
       return { installed: false }
     }
   })
+
+  // 构建完整的 PATH，包含常见的 Node.js 安装路径
+  // Electron GUI 应用的 PATH 很短（只有 /usr/bin:/bin 等），
+  // 用户通过 Homebrew、nvm、官方安装包装的 Node.js 都不在默认 PATH 里
+  function getFullPath(): string {
+    const home = homedir()
+    const extraPaths = [
+      join(home, '.nvm/versions/node'), // nvm - 需要动态查找
+      join(home, '.npm-global/bin'),
+      join(home, '.openclaw/bin'),
+      join(home, '.openclaw/tools/bin'),
+      '/opt/homebrew/bin',              // Homebrew (Apple Silicon)
+      '/usr/local/bin',                 // Homebrew (Intel) / 官方安装包
+      '/usr/local/sbin',
+    ]
+
+    // nvm: 找到最新版本目录
+    const nvmBase = join(home, '.nvm/versions/node')
+    if (existsSync(nvmBase)) {
+      try {
+        const versions = readdirSync(nvmBase).sort().reverse()
+        if (versions.length > 0) {
+          extraPaths.unshift(join(nvmBase, versions[0], 'bin'))
+        }
+      } catch {}
+    }
+
+    const currentPath = process.env.PATH || ''
+    return [...extraPaths, currentPath].join(':')
+  }
+
+  // 带完整 PATH 的 exec
+  function execWithPath(cmd: string, opts: Record<string, unknown> = {}) {
+    return execAsync(cmd, {
+      ...opts,
+      env: { ...process.env, PATH: getFullPath() }
+    })
+  }
 
   ipcMain.handle('openclaw:install', async () => {
     const platform = process.platform
@@ -119,35 +154,56 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
         }
         return { success: true, message: 'OpenClaw 安装成功' }
       } else {
-        // macOS/Linux: 使用 CLI 安装脚本（无需 root 权限）
-        let installCmd = 'curl -fsSL https://openclaw.ai/install-cli.sh | bash'
-        
-        if (platform === 'darwin') {
-          // macOS: 检测是否为 Apple Silicon，强制使用原生 arm64 架构执行
-          // 避免 Electron 以 Rosetta (x64) 运行时导致脚本下载错误架构的 Node.js
-          try {
-            await execAsync('/usr/bin/arch -arm64 true')
-            // 硬件支持 arm64，强制以 arm64 执行安装脚本
-            installCmd = '/usr/bin/arch -arm64 bash -c \'curl -fsSL https://openclaw.ai/install-cli.sh | bash\''
-          } catch {
-            // Intel Mac，直接执行
+        // macOS/Linux: 先检测系统是否已有 Node.js
+        let hasNode = false
+        try {
+          const { stdout } = await execWithPath('node --version')
+          const ver = parseInt(stdout.trim().replace('v', '').split('.')[0])
+          hasNode = ver >= 22
+          if (!hasNode && ver > 0) {
+            console.log(`Node.js ${stdout.trim()} 版本过低，需要 v22+`)
           }
+        } catch {
+          console.log('系统未安装 Node.js')
         }
-        
-        const { stderr } = await execAsync(installCmd, { timeout: 600000 })
-        
-        if (stderr && !stderr.includes('WARN')) {
-          return { success: false, message: stderr }
+
+        if (hasNode) {
+          // 已有 Node.js >= 22，直接用 npm 安装 OpenClaw（用户目录，无需 sudo）
+          const home = homedir()
+          const npmGlobal = join(home, '.npm-global')
+          
+          // 确保 npm prefix 指向用户目录
+          await execWithPath(`npm config set prefix "${npmGlobal}"`, { timeout: 30000 }).catch(() => {})
+          
+          const { stderr } = await execWithPath('npm install -g openclaw', { timeout: 300000 })
+          if (stderr && !stderr.includes('WARN')) {
+            return { success: false, message: stderr }
+          }
+          return { success: true, message: 'OpenClaw 安装成功' }
+        } else {
+          // 没有 Node.js 或版本太低，使用官方 CLI 安装脚本（会自带 Node.js 运行时）
+          let installCmd = 'curl -fsSL https://openclaw.ai/install-cli.sh | bash'
+          
+          // Apple Silicon: 强制 arm64 执行，避免 Rosetta 架构问题
+          if (platform === 'darwin') {
+            try {
+              await execAsync('/usr/bin/arch -arm64 true')
+              installCmd = "/usr/bin/arch -arm64 bash -c 'curl -fsSL https://openclaw.ai/install-cli.sh | bash'"
+            } catch {}
+          }
+          
+          const { stderr } = await execAsync(installCmd, { timeout: 600000 })
+          if (stderr && !stderr.includes('WARN')) {
+            return { success: false, message: stderr }
+          }
+          return { success: true, message: 'OpenClaw 安装成功' }
         }
-        
-        return { success: true, message: 'OpenClaw 安装成功' }
       }
     } catch (error: any) {
       return { 
         success: false, 
         message: error?.message || '安装失败，请尝试手动安装' 
       }
-    }
     }
   })
 
