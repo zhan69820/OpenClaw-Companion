@@ -1,6 +1,6 @@
 appId: com.openclaw.companion
-productName: OpenClaw Companion
-copyright: Copyright © 2025 OpenClaw Companion
+productName: OpenClaw-Companion
+copyright: Copyright © 2025 OpenClaw-Companion
 
 directories:
   buildResources: build

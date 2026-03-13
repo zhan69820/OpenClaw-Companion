@@ -16,6 +16,14 @@ const total = ref(0)
 
 // 内置的版本更新日志
 const changelog: Record<string, { title: string; items: string[] }> = {
+  '1.1.2-beta': {
+    title: '修复自动更新文件名',
+    items: [
+      '修复 latest-mac.yml 与实际文件名不匹配的问题',
+      '统一 productName 为 OpenClaw-Companion（无空格）',
+      '自动更新功能现在应该可以正常工作了'
+    ]
+  },
   '1.1.1-beta': {
     title: '测试更新',
     items: [
