@@ -45,6 +45,12 @@ const router = createRouter({
       name: 'Uninstall',
       component: () => import('@/views/Uninstall.vue'),
       meta: { title: '卸载', icon: 'trash-2' }
+    },
+    {
+      path: '/about',
+      name: 'About',
+      component: () => import('@/views/About.vue'),
+      meta: { title: '关于', icon: 'info' }
     }
   ]
 })

@@ -2,7 +2,7 @@ import { app, BrowserWindow, shell } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerIpcHandlers } from './ipc'
-import { initUpdater, checkForUpdates } from './updater'
+import { initUpdater } from './updater'
 
 let ipcRegistered = false
 
@@ -42,10 +42,6 @@ function createWindow(): void {
   }
 
   initUpdater(mainWindow)
-
-  setTimeout(() => {
-    checkForUpdates()
-  }, 3000)
 }
 
 app.whenReady().then(() => {

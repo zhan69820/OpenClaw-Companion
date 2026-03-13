@@ -22,6 +22,9 @@ export default defineConfig({
       postcss: {
         plugins: [tailwindcss(), autoprefixer()]
       }
+    },
+    define: {
+      __APP_VERSION__: JSON.stringify(process.env.npm_package_version)
     }
   }
 })

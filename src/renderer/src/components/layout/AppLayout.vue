@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useConfigStore } from '@/stores/config'
 import { useI18n } from '@/composables/useI18n'
@@ -20,7 +20,9 @@ import {
   FolderOpen,
   Globe,
   RefreshCw,
-  Activity
+  Activity,
+  Info,
+  Circle
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -28,8 +30,21 @@ const route = useRoute()
 const config = useConfigStore()
 const { t, locale } = useI18n()
 
-const isDark = ref(true)
+const isDark = ref(false) // 默认明亮模式
 const showLangMenu = ref(false)
+const hasUpdate = ref(false) // 是否有新版本
+const appVersion = __APP_VERSION__ // 版本号
+
+const navItems = computed(() => [
+  { path: '/llm', label: t('nav.llm'), icon: Brain, desc: 'LLM Hub' },
+  { path: '/channels', label: t('nav.channels'), icon: Radio, desc: 'Channels' },
+  { path: '/backup', label: t('nav.backup'), icon: Archive, desc: 'Backup' },
+  { path: '/doctor', label: t('nav.doctor'), icon: Stethoscope, desc: 'Doctor' },
+  { path: '/preview', label: t('nav.preview'), icon: FileCode2, desc: 'Preview' },
+  { path: '/manager', label: t('nav.manager'), icon: Activity, desc: 'Service' },
+  { path: '/uninstall', label: t('nav.uninstall'), icon: Trash2, desc: 'Uninstall' },
+  { path: '/about', label: '关于', icon: Info, desc: 'About' }
+])
 
 const languages = [
   { code: 'zh' as const, label: '中文' },
@@ -51,15 +66,7 @@ function toggleTheme() {
   document.documentElement.classList.toggle('dark', isDark.value)
 }
 
-const navItems = computed(() => [
-  { path: '/llm', label: t('nav.llm'), icon: Brain, desc: 'LLM Hub' },
-  { path: '/channels', label: t('nav.channels'), icon: Radio, desc: 'Channels' },
-  { path: '/backup', label: t('nav.backup'), icon: Archive, desc: 'Backup' },
-  { path: '/doctor', label: t('nav.doctor'), icon: Stethoscope, desc: 'Doctor' },
-  { path: '/preview', label: t('nav.preview'), icon: FileCode2, desc: 'Preview' },
-  { path: '/manager', label: t('nav.manager'), icon: Activity, desc: 'Service' },
-  { path: '/uninstall', label: t('nav.uninstall'), icon: Trash2, desc: 'Uninstall' }
-])
+
 
 async function handleSave() {
   const result = await config.save()
@@ -91,9 +98,34 @@ async function checkForUpdates() {
   }
 }
 
+// 静默检查更新（启动时）
+async function silentCheckUpdate() {
+  try {
+    await window.api.updater.check()
+  } catch {
+    // 静默失败
+  }
+}
+
+let unsubUpdate: (() => void) | null = null
+
 onMounted(() => {
-  document.documentElement.classList.add('dark')
+  // 默认明亮模式
+  document.documentElement.classList.remove('dark')
   document.addEventListener('click', handleClickOutside)
+
+  // 监听更新可用事件，显示红点
+  unsubUpdate = window.api.updater.on('update:available', () => {
+    hasUpdate.value = true
+  })
+
+  // 静默检查更新
+  silentCheckUpdate()
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+  unsubUpdate?.()
 })
 </script>
 
@@ -258,12 +290,21 @@ onMounted(() => {
           <!-- 检查更新按钮 -->
           <button
             @click="checkForUpdates"
-            class="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+            class="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors relative"
             :title="t('sidebar.checkUpdate')"
           >
             <RefreshCw class="w-3.5 h-3.5" />
             {{ t('sidebar.checkUpdate') }}
+            <!-- 更新红点 -->
+            <span
+              v-if="hasUpdate"
+              class="absolute right-2 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-red-500 animate-pulse"
+            />
           </button>
+          <!-- 版本号 -->
+          <div class="text-center">
+            <span class="text-[10px] text-muted-foreground/50">v{{ appVersion }}</span>
+          </div>
         </div>
       </aside>
 
