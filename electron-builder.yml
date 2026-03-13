@@ -23,12 +23,19 @@ nsis:
   deleteAppDataOnUninstall: false
 
 mac:
+  # default 目标会自动生成 dmg 和 zip，zip 用于自动更新
   target:
-    - target: dmg
-      arch: [x64, arm64]
-    - target: zip
+    - target: default
       arch: [x64, arm64]
   icon: build/icon.png
+  # 使用 ad-hoc 签名（不需要 Apple 开发者账号）
+  identity: null
+  # 禁用 Gatekeeper 评估
+  gatekeeperAssess: false
+  # 签名所有二进制文件
+  signIgnore: []
+  # 强制严格签名
+  strictVerify: false
 
 linux:
   target:

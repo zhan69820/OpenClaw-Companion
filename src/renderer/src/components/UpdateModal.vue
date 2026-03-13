@@ -16,6 +16,15 @@ const total = ref(0)
 
 // 内置的版本更新日志
 const changelog: Record<string, { title: string; items: string[] }> = {
+  '1.1.3-beta': {
+    title: '修复 macOS 自动更新重启无效',
+    items: [
+      '使用 default 目标替代单独的 dmg+zip',
+      '添加 ad-hoc 签名配置（无需 Apple 开发者账号）',
+      '禁用 Gatekeeper 评估',
+      '修复更新下载成功但重启后版本未变的问题'
+    ]
+  },
   '1.1.2-beta': {
     title: '修复自动更新文件名',
     items: [

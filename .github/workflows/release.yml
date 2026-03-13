@@ -50,7 +50,10 @@ jobs:
 
       - name: Build macOS
         if: matrix.platform == 'mac'
-        run: npx electron-builder --mac --config electron-builder.yml -c.mac.identity=null --publish never
+        env:
+          # 启用 ad-hoc 签名
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+        run: npx electron-builder --mac --config electron-builder.yml --publish never
 
       - name: Build Linux
         if: matrix.platform == 'linux'
