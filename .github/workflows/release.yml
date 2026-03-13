@@ -67,8 +67,8 @@ jobs:
           name: windows-build
           path: |
             release/*.exe
+            release/*.exe.blockmap
             release/latest.yml
-            !release/*.exe.blockmap
 
       - name: Upload macOS artifacts
         if: matrix.platform == 'mac'
@@ -77,6 +77,9 @@ jobs:
           name: macos-build
           path: |
             release/*.dmg
+            release/*.dmg.blockmap
+            release/*.zip
+            release/*.zip.blockmap
             release/latest-mac.yml
 
       - name: Upload Linux artifacts
@@ -105,13 +108,23 @@ jobs:
       - name: Collect release files
         run: |
           mkdir -p release
-          find artifacts/ -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.yml" \) -exec cp {} release/ \;
+          find artifacts/ -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.zip" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.yml" -o -name "*.blockmap" \) -exec cp {} release/ \;
           ls -la release/
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: release/*
-          generate_release_notes: true
           draft: false
           prerelease: false
+          body: |
+            ## OpenClaw Companion ${{ github.ref_name }}
+
+            ### 更新内容
+            请查看 commit 历史了解详细变更。
+
+            ### 下载
+            - **Windows**: `.exe` 安装包
+            - **macOS (Apple Silicon)**: `arm64.dmg`
+            - **macOS (Intel)**: `.dmg`
+            - **Linux**: `.AppImage` / `.deb`

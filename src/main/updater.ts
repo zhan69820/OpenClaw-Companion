@@ -20,7 +20,8 @@ export function initUpdater(window: BrowserWindow): void {
   autoUpdater.on('update-available', (info) => {
     send('update:available', {
       version: info.version,
-      releaseNotes: info.releaseNotes || ''
+      releaseNotes: info.releaseNotes || '',
+      releaseDate: info.releaseDate || ''
     })
   })
 
