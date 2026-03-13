@@ -2,6 +2,7 @@ import { autoUpdater } from 'electron-updater'
 import { BrowserWindow, shell } from 'electron'
 
 let mainWindow: BrowserWindow | null = null
+let silentMode = false
 
 export function initUpdater(window: BrowserWindow): void {
   mainWindow = window
@@ -10,7 +11,10 @@ export function initUpdater(window: BrowserWindow): void {
   autoUpdater.autoInstallOnAppQuit = true
 
   autoUpdater.on('checking-for-update', () => {
-    send('update:checking')
+    // 静默模式不发送 checking 事件（避免弹窗）
+    if (!silentMode) {
+      send('update:checking')
+    }
   })
 
   autoUpdater.on('update-available', (info) => {
@@ -21,11 +25,17 @@ export function initUpdater(window: BrowserWindow): void {
   })
 
   autoUpdater.on('update-not-available', () => {
-    send('update:not-available')
+    // 静默模式不发送 not-available 事件（避免弹窗）
+    if (!silentMode) {
+      send('update:not-available')
+    }
   })
 
   autoUpdater.on('error', (err) => {
-    send('update:error', { message: err.message })
+    // 静默模式不发送错误事件
+    if (!silentMode) {
+      send('update:error', { message: err.message })
+    }
   })
 
   autoUpdater.on('download-progress', (progress) => {
@@ -48,14 +58,16 @@ function send(channel: string, payload?: unknown): void {
   }
 }
 
-export function checkForUpdates(): void {
+export function checkForUpdates(silent = false): void {
   if (process.env.NODE_ENV === 'development') {
-    console.log('Skipping update check in development mode')
     return
   }
+  silentMode = silent
   autoUpdater.checkForUpdates().catch(err => {
     console.error('Failed to check for updates:', err)
-    send('update:error', { message: err.message })
+    if (!silentMode) {
+      send('update:error', { message: err.message })
+    }
   })
 }
 

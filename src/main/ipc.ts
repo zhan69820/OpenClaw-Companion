@@ -6,7 +6,7 @@ import { join } from 'path'
 import { homedir, tmpdir } from 'os'
 import { ConfigManager } from './config'
 import { testLLMConnection, fetchModels } from './llm-test'
-import { checkPort } from './doctor'
+import { checkPort, runDiagnostics, fixItem } from './doctor'
 import { checkForUpdates, downloadUpdate, quitAndInstall, openReleasePage } from './updater'
 
 const execAsync = promisify(exec)
@@ -85,6 +85,14 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
   // ── 故障检测 ──
   ipcMain.handle('doctor:checkPort', async (_e, port: number) => {
     return checkPort(port)
+  })
+
+  ipcMain.handle('doctor:runDiagnostics', async () => {
+    return runDiagnostics()
+  })
+
+  ipcMain.handle('doctor:fixItem', async (_e, id: string) => {
+    return fixItem(id)
   })
 
   // ── OpenClaw 检测与安装 ──
@@ -732,7 +740,12 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
 
   // ── 检查更新 ──
   ipcMain.handle('updater:check', async () => {
-    checkForUpdates()
+    checkForUpdates(false)
+    return { ok: true }
+  })
+
+  ipcMain.handle('updater:silentCheck', async () => {
+    checkForUpdates(true)
     return { ok: true }
   })
 

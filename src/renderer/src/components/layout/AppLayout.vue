@@ -101,7 +101,7 @@ async function checkForUpdates() {
 // 静默检查更新（启动时）
 async function silentCheckUpdate() {
   try {
-    await window.api.updater.check()
+    await window.api.updater.silentCheck()
   } catch {
     // 静默失败
   }

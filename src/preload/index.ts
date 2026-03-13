@@ -28,7 +28,9 @@ const api = {
   },
   // 故障检测
   doctor: {
-    checkPort: (port: number) => ipcRenderer.invoke('doctor:checkPort', port)
+    checkPort: (port: number) => ipcRenderer.invoke('doctor:checkPort', port),
+    runDiagnostics: () => ipcRenderer.invoke('doctor:runDiagnostics'),
+    fixItem: (id: string) => ipcRenderer.invoke('doctor:fixItem', id)
   },
   // OpenClaw 安装检测与进程管理
   openclaw: {
@@ -63,6 +65,7 @@ const api = {
   // 检查更新
   updater: {
     check: () => ipcRenderer.invoke('updater:check'),
+    silentCheck: () => ipcRenderer.invoke('updater:silentCheck'),
     download: () => ipcRenderer.invoke('updater:download'),
     install: () => ipcRenderer.invoke('updater:install'),
     openRelease: () => ipcRenderer.invoke('updater:openRelease'),
