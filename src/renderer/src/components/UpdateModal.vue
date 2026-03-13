@@ -16,6 +16,14 @@ const total = ref(0)
 
 // 内置的版本更新日志
 const changelog: Record<string, { title: string; items: string[] }> = {
+  '1.1.1-beta': {
+    title: '测试更新',
+    items: [
+      '测试 macOS 自动更新功能',
+      '验证 ZIP 文件下载和安装流程',
+      '如果看到这个更新说明自动更新已修复成功！'
+    ]
+  },
   '1.1.0-beta': {
     title: '重大更新',
     items: [
