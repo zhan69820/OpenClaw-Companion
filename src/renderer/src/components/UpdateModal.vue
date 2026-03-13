@@ -16,29 +16,15 @@ const total = ref(0)
 
 // 内置的版本更新日志
 const changelog: Record<string, { title: string; items: string[] }> = {
-  '1.1.3-beta': {
-    title: '修复 macOS 自动更新重启无效',
+  '1.2.0-beta': {
+    title: '版本统一',
     items: [
-      '使用 default 目标替代单独的 dmg+zip',
-      '添加 ad-hoc 签名配置（无需 Apple 开发者账号）',
-      '禁用 Gatekeeper 评估',
-      '修复更新下载成功但重启后版本未变的问题'
-    ]
-  },
-  '1.1.2-beta': {
-    title: '修复自动更新文件名',
-    items: [
-      '修复 latest-mac.yml 与实际文件名不匹配的问题',
-      '统一 productName 为 OpenClaw-Companion（无空格）',
-      '自动更新功能现在应该可以正常工作了'
-    ]
-  },
-  '1.1.1-beta': {
-    title: '测试更新',
-    items: [
-      '测试 macOS 自动更新功能',
-      '验证 ZIP 文件下载和安装流程',
-      '如果看到这个更新说明自动更新已修复成功！'
+      'macOS 改为 Universal 通用版（同时支持 Intel 和 Apple Silicon）',
+      '简化安装包数量，每个平台只有一个安装包',
+      '全新龙虾应用图标',
+      '故障急救箱：10 项环境自动检测 + 一键修复',
+      '新增关于页面',
+      '默认明亮模式'
     ]
   },
   '1.1.0-beta': {

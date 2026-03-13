@@ -128,6 +128,5 @@ jobs:
 
             ### 下载
             - **Windows**: `.exe` 安装包
-            - **macOS (Apple Silicon)**: `arm64.dmg`
-            - **macOS (Intel)**: `.dmg`
+            - **macOS**: `.dmg`（Intel + Apple Silicon 通用版）
             - **Linux**: `.AppImage` / `.deb`
